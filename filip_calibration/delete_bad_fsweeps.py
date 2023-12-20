@@ -42,7 +42,7 @@ resonators_geometry = {
 
 plt.close('all')
 save =True
-for temp in temps[10:]:
+for temp in temps[:]:
     
     T = float(temp[1:].split('_')[0])*1e-3
     print(f'\ntemp: {T}\n')   
@@ -87,7 +87,7 @@ for temp in temps[10:]:
     # Ffiels = Ffiles.sort(key=lambda x : np.load(x,allow_pickle=True).item()['App (V)'])
     Freqfiles = np.sort(Freqfiles)
     
-    for num, file in enumerate(Ffiles[102:105]):
+    for num, file in enumerate(Ffiles[:]):
         #print(num)
         d = np.load(file, allow_pickle=True).item()
         
@@ -118,8 +118,13 @@ for temp in temps[10:]:
         result = peak.fit(plot=True)
         par = result.best_values
         res_fit = result.best_fit
+        
+        ax[0].clear()
+        ax[1].clear()
         ax[0].plot(f, x, 'o',ms = 3)
         ax[1].plot(f, y, 'o', ms = 3)
+        fig.canvas.draw()
+        
         index1 = f < (f[0] + 50)
         index2 = f>f[-1]-10
 
@@ -130,15 +135,14 @@ for temp in temps[10:]:
         std2 = np.std(array2)
         print(std1,'\n',std2)
         if std1 > 1e-10 or std2 > 1e-10:
-            plt.waitforbuttonpress()
-            print('remove?')
-            decision = input()
-            
-            if decision == 'y':
+            print('remove? \n mouseclick = no \n buttonpress = yes')
+            if plt.waitforbuttonpress():
                 os.remove(file)
+                print('removed')
                 
         # ax[0].plot(f, np.real(res_fit), 'k--')
         # ax[1].plot(f, np.imag(res_fit), 'k--')
+
         """
         get linear background params
         a1 -> lin y
