@@ -36,6 +36,6 @@ for resonator in resonators:
         axx.plot(f,x,'.',c = cmap(A/A_max))
         axy.plot(f,y,'.',c = cmap(A/A_max))
         axx.set_xlabel(r"sometext with some equation $\sum_{i=0}^{\inf} \Omega (i)$")
-    polish(fig,1)
+    polish(fig,1,extension='.png')
 
 

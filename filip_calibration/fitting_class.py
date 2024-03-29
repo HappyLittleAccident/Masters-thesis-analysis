@@ -13,7 +13,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.signal import savgol_filter
 
 def microwave_peak(f, f0, A,gamma, a1, b1, a2, b2,phi):
-    z = f0*A*gamma/(f0**2 - f**2 + 1j*f*gamma)*np.exp(1j*phi) + ((a1*f + b1)*1j + (a2*f + b2))
+    z = f0*A*gamma/(f0**2 - f**2 + 1j*f*gamma)*np.exp(1j*phi) + (a1*(f-2000) + b1)*1j + (a2*(f-2000) + b2)
     return z
 
 
@@ -39,7 +39,7 @@ class MicrowavePeak:
         #self.p0 = self.model.make_params(A=self.init_p[1], f0=self.init_p[0], gamma=self.init_p[2], a1=self.init_p[3], b1=self.init_p[4], a2=self.init_p[5], b2=self.init_p[6], phi = self.init_p[7])
         self.p0 = self.model.make_params(A=self.init_p[1], f0=self.init_p[0], gamma=self.init_p[2], a1=self.init_p[3], b1=self.init_p[4], a2=self.init_p[5], b2=self.init_p[6],phi = self.init_p[7])
     def fit(self, plot=False):
-        self.p0['a1'].set(vary=False)
+        self.p0['a1'].set(vary=True)
         self.p0['a2'].set(vary=True)
         self.out= self.model.fit(self.z, f=self.f, params=self.p0,weights = 1/np.sqrt(self.x**2 + self.y**2))
             
