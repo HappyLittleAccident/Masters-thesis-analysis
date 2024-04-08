@@ -39,8 +39,8 @@ const_a = 1.6
 const_b = 1.192
 const_d = 1.79
 ka = 3
-kb = 2.66
-kd = 2.4
+kb = 3
+kd = 3
 const_k = 1
 cut = 0
 
@@ -127,7 +127,7 @@ for i,file in enumerate(files[0:1]):
         T0 = T
         cp = he.heat_capacity(T)[0]/0.0040026
         s = he.entropy(T)[0]
-        R = 700*T**(-3.6) #60e-4*T**(-3) #
+        R = 750*T**(-3.6) #60e-4*T**(-3) #
         B = he.mutual_friction_B(T)[0]
         kappa = he.quantized_circulation
         L = 0e9
@@ -190,7 +190,7 @@ for i,file in enumerate(files[0:1]):
     
     axres.plot(temperatures,f0,'o',c=colors[i],label='Measured '+letter)
     axres.plot(temperatures,f0_theory,'--',c=colors[i],label='Theoretical prediction corrected')
-    axres.plot(temperatures,f0_simple,'-',c=colors[i],label='Theoretical prediction corrected')
+    axres.plot(temperatures,f0_simple,'-',c=colors[i],label='Theoretical prediction simple')
    
     
     

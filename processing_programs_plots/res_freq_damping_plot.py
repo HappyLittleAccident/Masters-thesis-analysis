@@ -41,7 +41,7 @@ expand = CubicSpline(T_spline,alpha_spline)
 resonators_geometry = {
     'A':{        
         'w':  1000e-6,
-        'l':  1050e-6/0.65,
+        'l':  1.601*1050e-6,
         'C0': 338.63213961685864e-12,
         'kp': 3*1.2400632746323976e7
         },
@@ -132,6 +132,8 @@ for i,file in enumerate(files[:]):
     rhosi = 2634
     # tau = s/s*1e-4
     
+    print(1-2*chi*D*k*(1.057-1)/1.057/4/A)
+    print(chi*D*k/(2*A))
     # print(np.array([csi*rhosi*1*9*7e-9*R,tau]).T)
     # print(np.array([1*tau/tau,tau*OMEGA,tau**2*omega0**2]).T)
     # print(OMEGA*tau)
