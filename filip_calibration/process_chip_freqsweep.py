@@ -243,6 +243,7 @@ for letter in letters[2:3]:
             SIG = chi*h*kp/(2*A)
             #print(SIG)
             g = (2*a*rhos)/(VB*rho)*(1 - 2*(er - 1)/er*SIG)/(1 + 2*SIG)
+            print(g)
             v = I/(g*bias*C0)
             return v
             

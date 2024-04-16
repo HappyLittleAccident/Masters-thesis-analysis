@@ -131,9 +131,15 @@ for i,file in enumerate(files[:]):
     csi = 2e-3*1.5**3
     rhosi = 2634
     # tau = s/s*1e-4
-    
-    print(1-2*chi*D*k*(1.057-1)/1.057/4/A)
-    print(chi*D*k/(2*A))
+
+    er = 1.0565
+    sigma = chi*D*k/(2*A)
+    g = 2*a*rhos/(D*A*rho*(1 + 2*sigma))
+    print(sigma)
+    # print((2*chi/(A*(1+sigma)))*(resonator['C0']**2)*30*30*1*f0*2*np.pi/D)
+    print(g)
+    print(2*30*chi/(g*A*D*(1 + 2*sigma)))
+    print(4e-9/g/30/resonator['C0'])
     # print(np.array([csi*rhosi*1*9*7e-9*R,tau]).T)
     # print(np.array([1*tau/tau,tau*OMEGA,tau**2*omega0**2]).T)
     # print(OMEGA*tau)

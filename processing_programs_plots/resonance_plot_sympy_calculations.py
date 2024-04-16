@@ -92,6 +92,9 @@ figrest,((axvn,axx),(axT,axP)) = plt.subplots(2,2,sharex=True)
 figdamp,axdamp = plt.subplots(1,1,sharex=True) 
 figgraph,axgraph = plt.subplots(2,1,sharex=True)
 cmap = plt.get_cmap('viridis')
+inferno = plt.get_cmap('Reds')
+
+fig_meas,ax_meas = plt.subplots()
 
 for i,file in enumerate(files[0:1]):
     f0_theory = []
@@ -167,19 +170,28 @@ for i,file in enumerate(files[0:1]):
         f0_simple.append(res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s))
         geom_factor_simple.append(f0_basic/np.sqrt(rhos/(chi*rho**2)))
         
-        Fes = (C0*10*8e-3)/D
+        Fes = (C0*30*8e-3)/D
         
-        color_scale = (T-temperatures[0])/(temperatures[-1]-temperatures[0])     
+        color_scale = (T-temperatures[0])/(temperatures[-1]-temperatures[0]) 
+        axgraph[0].clear()
+        axgraph[1].clear()
         axgraph[0].plot(freqs/np.pi/2,np.real(vs_plot(freqs)*Fes),c=cmap(color_scale))
         axgraph[1].plot(freqs/np.pi/2,np.imag(vs_plot(freqs)*Fes),c=cmap(color_scale))
+        axgraph[0].plot(freqs/np.pi/2,np.real(vs_plot(freqs)*Fes + vn_plot(freqs)*Fes*rhon/rhos),c=inferno(color_scale))
+        axgraph[1].plot(freqs/np.pi/2,np.imag(vs_plot(freqs)*Fes+ vn_plot(freqs)*Fes*rhon/rhos),c=inferno(color_scale))
         
         axx.plot(freqs/np.pi/2,np.abs(x_plot(freqs)*Fes),c=cmap(color_scale))
         axvn.plot(freqs/np.pi/2,np.abs(vn_plot(freqs)*Fes),c=cmap(color_scale))
         axP.plot(freqs/np.pi/2,np.abs(P_plot(freqs)*Fes),c=cmap(color_scale))
         axP.axhline(Fes*2*A/(2*A**2 + k*D*A*chi))
         axT.plot(freqs/np.pi/2,np.abs(T_plot(freqs)*Fes),c=cmap(color_scale))
+        figgraph.canvas.draw()
         # print('c4: ',c4)
+        while not plt.waitforbuttonpress():
+            pass
+
     print(letter + ': ',f0[0],'\ntheory: ',f0_theory[0], '\ntheory simple: ',f0_simple[0])
+    
 
     axx.set_title('x')
     axvn.set_title('vn')
@@ -204,7 +216,6 @@ for i,file in enumerate(files[0:1]):
     axdamp.set_xlabel('Temperature (K)')
     axdamp.set_ylabel('Linewidth (Hz)')
     axdamp.legend()
-    
     
     
     

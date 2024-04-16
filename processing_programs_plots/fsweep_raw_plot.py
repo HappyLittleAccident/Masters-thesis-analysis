@@ -12,15 +12,15 @@ from glob import glob
 from format_figure import polish,use_latex
 
 plt.close('all')
-folder = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023-03-Helmholtz_resonators\Helmholtz_res_drive_dep'
+folder = r'D:\OneDrive\OneDrive - Univerzita Karlova\DATA\2023-03-Helmholtz_turbulence\Helmholtz_res_drive_dep'
 
 temp = 'T1350'
 resonators = ['500A','500B','500C','500D']
 
 cmap = plt.get_cmap('viridis')
 
-use_latex()
-# plt.rcdefaults()
+# use_latex()
+plt.rcdefaults()
 
 
 for resonator in resonators:
@@ -36,6 +36,6 @@ for resonator in resonators:
         axx.plot(f,x,'.',c = cmap(A/A_max))
         axy.plot(f,y,'.',c = cmap(A/A_max))
         axx.set_xlabel(r"sometext with some equation $\sum_{i=0}^{\inf} \Omega (i)$")
-    polish(fig,1,extension='.png')
+    # polish(fig,1,extension='.png')
 
 
