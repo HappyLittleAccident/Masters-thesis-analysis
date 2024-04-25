@@ -138,7 +138,7 @@ for i,file in enumerate(files[:]):
     print(sigma)
     # print((2*chi/(A*(1+sigma)))*(resonator['C0']**2)*30*30*1*f0*2*np.pi/D)
     print(g)
-    print(2*30*chi/(g*A*D*(1 + 2*sigma)))
+    print(30**2*resonator['C0']*chi/(D*A*(1 + 2*sigma)))
     print(4e-9/g/30/resonator['C0'])
     # print(np.array([csi*rhosi*1*9*7e-9*R,tau]).T)
     # print(np.array([1*tau/tau,tau*OMEGA,tau**2*omega0**2]).T)
@@ -196,6 +196,8 @@ for i,file in enumerate(files[:]):
     
     figres.canvas.draw()
     figdamp.canvas.draw()
+    print(np.log(3e-9/1e-10)*kappa/2/np.pi/D)
+ 
     break
     while not plt.waitforbuttonpress():
         pass
@@ -203,7 +205,7 @@ for i,file in enumerate(files[:]):
     axgraph[1].clear()
     axdamp.clear()
     axres.clear()
- 
+
     
     
     

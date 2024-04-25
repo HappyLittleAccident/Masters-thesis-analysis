@@ -28,7 +28,7 @@ def use_latex(font_size = 12):
     plt.rcParams.update(tex_fonts)
     return 0
 
-def polish(fig,fraction,name='',pagewidth=thesis,width_to_height = golden_ratio,extension = '.pdf'):
+def polish(fig,fraction,name='',pagewidth=thesis,width_to_height = golden_ratio,extension = '.pdf',grid=True):
     width_inch = point_to_inch*pagewidth
     width = fraction*width_inch
     height = width*width_to_height
@@ -42,8 +42,13 @@ def polish(fig,fraction,name='',pagewidth=thesis,width_to_height = golden_ratio,
         global n        
         name = str(n)
         n+=1
+    
 
     fig.set_size_inches(width, height*gs.nrows/gs.ncols, forward=True)
+
+    if grid:
+        for ax in fig.axes:
+            ax.grid('both')
     fig.savefig(name+extension)
     
     

@@ -30,7 +30,7 @@ resonators_geometry = {
         'w':  1000e-6,
         'l':  1050e-6,
         'C0': 338.63213961685864e-12,
-        'kp': 1.2400632746323976e7
+        'kp': 3*1.2400632746323976e7
         },
 
     
@@ -38,20 +38,20 @@ resonators_geometry = {
         'w':  500e-6,
         'l':  750e-6,
         'C0': 335.6978986554392e-12,
-        'kp': 1.4546169638969617e7
+        'kp': 3*1.4546169638969617e7
         },
     
     'C':{        
         'w':  950e-6,
         'l':  1000e-6,
         'C0': 312.8732100355237e-12,
-        'kp': 1.1909096177342793e7
+        'kp': 3*1.1909096177342793e7
         },
     'D':{
         'w': 500e-6, 
         'l': 950e-6,
         'C0':466.4158697787019e-12,
-        'kp':1.6174502699593267e7
+        'kp':3*1.6174502699593267e7
         }}
 
 plt.close('all')
@@ -92,8 +92,8 @@ for letter in letters[2:3]:
         resonator = f'{height:}{letter:}'
         
         
-        fsweeps =       rf'Helmholtz_res_drive_dep\{temp}\fsweeps\resonator_{height:}{letter:}\*.npy'
-        freqsweep_all = rf'Helmholtz_res_drive_dep\{temp}\fsweeps\resonator_{height:}{letter:}\*.npy'
+        fsweeps =       rf'fsweeps_sorted_raw\{temp}\fsweeps\resonator_{height:}{letter:}\*.npy'
+        freqsweep_all = rf'fsweeps_sorted_raw\{temp}\fsweeps\resonator_{height:}{letter:}\*.npy'
                         
         
         Ffiles = glob(fsweeps)
@@ -243,7 +243,7 @@ for letter in letters[2:3]:
             SIG = chi*h*kp/(2*A)
             #print(SIG)
             g = (2*a*rhos)/(VB*rho)*(1 - 2*(er - 1)/er*SIG)/(1 + 2*SIG)
-            print(g)
+            
             v = I/(g*bias*C0)
             return v
             
@@ -289,9 +289,9 @@ for letter in letters[2:3]:
             amploss = bridgelosses(letter, f[np.argmax(V)], Amp).get_loss()
             print(amploss)
             Amp = Amp*amploss*np.sqrt(2)
-            P = Pgrad(bias, Amp,T)*1e-3    
+            P = Pgrad(bias, Amp,T)    
             # print(f'pressure={P:.2f}')
-            data_to_save = {'Pressure (Pa/m)': P*1e3,'Velocity (m/s)': V,'Temperature (K)': Temp,'Freq (Hz)':f,
+            data_to_save = {'Pressure (Pa/m)': P,'Velocity (m/s)': V,'Temperature (K)': Temp,'Freq (Hz)':f,
                             'App_gen (V)':amplitude}
             
             if save:

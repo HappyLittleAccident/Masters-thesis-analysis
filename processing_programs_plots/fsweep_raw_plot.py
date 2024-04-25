@@ -26,8 +26,9 @@ plt.rcdefaults()
 for resonator in resonators:
     filenames = glob(os.path.join(folder,f'{temp}','fsweeps',f'resonator_{resonator}','*.npy'))
     fig,(axx,axy) = plt.subplots(2,1,sharex=True)
-    A_max = np.max([np.load(file_temp,allow_pickle=True).item()['App (V)'] for file_temp in filenames])
-    for file in filenames[:10]:
+    A_max = 3.5
+    #np.max([np.load(file_temp,allow_pickle=True).item()['App (V)'] for file_temp in filenames])
+    for file in filenames[:]:
         data = np.load(file,allow_pickle=True).item()
         f = data['freq (Hz)']
         x = data['x (A)']
@@ -35,7 +36,8 @@ for resonator in resonators:
         A = data['App (V)']
         axx.plot(f,x,'.',c = cmap(A/A_max))
         axy.plot(f,y,'.',c = cmap(A/A_max))
-        axx.set_xlabel(r"sometext with some equation $\sum_{i=0}^{\inf} \Omega (i)$")
+        axx.set_title(resonator)
+        # axx.set_xlabel(r"sometext with some equation $\sum_{i=0}^{\inf} \Omega (i)$")
     # polish(fig,1,extension='.png')
 
 
