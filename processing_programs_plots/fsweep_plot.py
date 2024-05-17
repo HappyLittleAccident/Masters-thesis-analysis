@@ -31,7 +31,7 @@ def lin(x,a,b):
     return a*x + b
 
 colors = ['tab:blue', 'k', 'tab:orange']
-for i, resonator in enumerate(resonators[2:3]):
+for i, resonator in enumerate(resonators[0:1]):
     figamp, axamp = plt.subplots()
     figwidth, axwidth = plt.subplots(2,1,dpi=250)
     cmaps = ['winter', 'winter', 'winter']
@@ -42,7 +42,7 @@ for i, resonator in enumerate(resonators[2:3]):
         mult = 1
     log = 0
     for log in [0,1]:
-        for temp in temps[0:-1:1+11*log]:
+        for temp in temps[1:-1:1+10*log]:
             print(temp)
             filenames = glob(os.path.join(folder, temp, f'{resonator}', '*.npy'))
             A_max = np.max([np.load(file_temp, allow_pickle=True).item()[
@@ -121,7 +121,7 @@ for i, resonator in enumerate(resonators[2:3]):
             # axamp.set_title(resonator + 'amp')
             # axwidth.set_title(resonator + 'width')
         if resonator == '500C':
-            axwidth[1].set_xlabel('Superfluid velocity (Arb.)')
+            axwidth[1].set_xlabel('Normalised superfluid velocity (Arb.)')
         else:
             axwidth[1].set_xlabel('Superfluid velocity (cm/s)')
         if log:
@@ -162,13 +162,13 @@ for i, resonator in enumerate(resonators[0:3]):
             f = data['Freq (Hz)']
             r = data['Velocity (m/s)']*100
             A = data['App_gen (V)']*mult
-            ax.plotw(f,r,'.',c=cmap(A/A_max))
+            ax.plot(f,r,'.',c=cmap(A/A_max))
     
     ax.set_xlabel('Driving frequency (Hz)')
     ax.set_ylabel('Superfluid velocity (cm/s)')
     
     fig.tight_layout()
     fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
-        vmin=1.325, vmax=1.85, clip=False), cmap=cmap), ax=ax, label='Pressure gradient (Pa/m)')
+        vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax, label='Pressure gradient (Pa/m)')
     
     polish(fig, 1, name=f'images//fsweeps{names[i]}', extension='.png', grid=True,width_to_height = 1.5)

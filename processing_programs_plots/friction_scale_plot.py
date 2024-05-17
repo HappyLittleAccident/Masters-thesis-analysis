@@ -1,0 +1,144 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec 12 16:55:10 2023
+
+@author: Marek
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+from glob import glob
+from format_figure import use_latex,polish
+import matplotlib as mpl
+import helium_old as he
+from scipy.interpolate import CubicSpline
+
+
+plt.close('all')
+
+temps = ['T1325', 'T1350', 'T1375', 'T1400', 'T1425', 'T1450', 'T1475',
+         'T1500', 'T1550', 'T1650', 'T1700', 'T1750', 'T1850', 'T1950']
+resonators = ['500A', '500B', '500C']
+names = ['C', 'J', 'R']
+
+# use_latex()
+# plt.rcdefaults()
+plt.ion()
+
+cmap = plt.get_cmap('winter')
+viridis = plt.get_cmap('viridis')
+
+# plt.ioff()
+# plt.ion()
+def compres (T):
+    a,b,c,d = ( 3.65456274e-10, -1.19112443e-09,  1.72705353e-09, 1.12838569e-08)
+    chi = a*T**3 + b*T**2 + c*T + d
+    return chi*10
+
+T_spline = [0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+alpha_spline = np.array([4.5, 3.3, 0.8, -3.2, -9.5, -18.0, -26.8, -38.0, -52.2, -71.3, -97.6, -129.6])*1e-4
+expand = CubicSpline(T_spline,alpha_spline)
+
+
+resonators_geometry = {
+    'A':{        
+        'w':  1000e-6,
+        'l':  1.601*1050e-6,
+        'C0': 338.63213961685864e-12,
+        'kp': 3*1.2400632746323976e7
+        },
+
+    
+    'B':{        
+        'w':  1000e-6,
+        'l':  1.55*750e-6,
+        'C0': 335.6978986554392e-12,
+        'kp': 2*1.4546169638969617e7
+        },
+    
+    'C':{        
+        'w':  950e-6,
+        'l':  1.03*1000e-6,
+        'C0': 312.8732100355237e-12,
+        'kp': 2*1.1909096177342793e7
+        },
+    'D':{
+        'w': 1000e-6, #orig= 500e-6
+        'l': 1.405*950e-6,
+        'C0':466.4158697787019e-12,
+        'kp':2*1.6174502699593267e7
+        }}
+
+D = 500e-9
+A = np.pi*(2.5e-3)**2
+colors = ['r','b','tab:orange','k']
+
+for i,resonator in enumerate(resonators[0:1]):
+    fig,ax = plt.subplots(1,1,sharex=False,dpi=150)
+    fig_w, ax_w = plt.subplots()
+    for j,temp in enumerate(temps):
+        scale = (float(temp[1:])*1e-3 - 1.325)/(1.95 - 1.325)
+        
+
+        filenames = glob(
+            fr'Helmholtz_res_drive_dep\{temp}\ampsweeps_fast\resonator_{resonator}_updowndown\*.npy'
+            )
+        filenames_vld = glob(
+            rf'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\Helmholtz_res_VLD\{temp}\{resonator}\*.npy'
+            )
+
+        data = np.load(filenames[5],allow_pickle=True).item()
+        data_vld = np.load(filenames_vld[5],allow_pickle=True).item()
+        
+        upP = data['upPressure (Pa/m)']/1.3
+        downP = data['downPressure (Pa/m)']
+        jumpP = data['jumpPressure (Pa/m)']
+        up = data['upVelocity (m/s)']*100
+        down =  data['downVelocity (m/s)']*100
+        jump = data['jumpVelocity (m/s)']*100
+        
+        
+        upV = data_vld['upV (m/s)']*1.07
+        upL = data_vld['upL (m^-2)']
+        T = data_vld['Temp (K)']
+        width = data_vld['Width (Hz)']
+        letter = resonator[-1]
+        print(T,width)
+        
+        resonator_pars = resonators_geometry[letter]
+        k = resonator_pars['kp']
+        l = resonator_pars['l']
+        a = D*resonator_pars['w']
+
+        
+        rhos = he.superfluid_density(T)
+        rho = he.density(T)
+        chi = compres(T)
+        T0 = T
+        c = he.heat_capacity(T)/0.0040026
+        s = he.entropy(T)
+        B = he.mutual_friction_B(T)
+        alpha = he.mutual_friction_alpha(T)
+        kappa = he.quantized_circulation
+        L = 0e9
+        c4 = he.fourth_sound_velocity(T)
+        alpha = expand(T)
+
+        
+        
+
+        ax_w.plot(upP/rho/upV/2/np.pi)
+        # ax_w.axhline(width)
+        
+        ax.plot(upV*100, 1e3*upV/(upP/rho/upV - 2*np.pi*width)/np.sqrt(2),c=cmap(scale))
+        # ax.plot(upV*100,upL + indent,c=cmap(scale))
+    ax.axhline(1,c='k',ls = '--',label='channel dimension') #1mm
+    ax.set_xlabel('Superfluid velocity (cm/s)')
+    ax.set_ylabel(r'Friction scale $l_{\alpha}$ (mm)')
+    ax.legend()
+    fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
+    vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax, label='Temperature (K)')
+    
+    # ax.set_ylabel(r'VLD $(m^{-2})$')
+

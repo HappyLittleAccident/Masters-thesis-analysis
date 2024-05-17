@@ -21,7 +21,9 @@ figdamp,axdamp = plt.subplots(1,1,sharex=True)
 
 figgraph,axgraph = plt.subplots(2,1,sharex=True)
 
+# folder = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\Helmholtz_fsweeps_amplitudes_and_widths\widths'
 folder = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\resonance_freq'
+# folder = r'D:\OneDrive\OneDrive - Univerzita Karlova\DATA\2023-03-calibrated_data\2023_4_Helmholtz_resonators_recal_2\Helmholtz_fsweeps_amplitudes_and_widths\500A'
 
 files = glob(os.path.join(folder,'*.npy'))
 
@@ -91,10 +93,10 @@ def width_full(omega0,tau,OMEGA,B,kappa,rho,rhos,L):
 def response(omega,omega0,tau,OMEGA):
     return 1j*omega/(-omega**2+omega0**2 + 1j*omega*OMEGA/(1j*tau * omega +1))
 
-D = 500e-9
+D = 490e-9
 A = np.pi*(2.5e-3)**2
 colors = ['r','b','tab:orange','k']
-for i,file in enumerate(files[:]):
+for i,file in enumerate(files[:1]):
     letter = file.split('\\')[-1].split('.')[0][-1]
 
     d = np.load(file,allow_pickle=True).item()
@@ -104,7 +106,12 @@ for i,file in enumerate(files[:]):
     f0 = [np.mean(x) for x in f0s]
     
     ws = d['width (Hz)']
+
+
     w = [np.mean(x) for x in ws]
+    for temp,wid in zip(T,w):
+        print(temp,wid)
+    break
     
     resonator = resonators_geometry[letter]
     k = resonator['kp']
@@ -135,11 +142,13 @@ for i,file in enumerate(files[:]):
     er = 1.0565
     sigma = chi*D*k/(2*A)
     g = 2*a*rhos/(D*A*rho*(1 + 2*sigma))
-    print(sigma)
+    
+    print(((1+sigma/3)/(1+sigma)/1.66)[0])
     # print((2*chi/(A*(1+sigma)))*(resonator['C0']**2)*30*30*1*f0*2*np.pi/D)
-    print(g)
-    print(30**2*resonator['C0']*chi/(D*A*(1 + 2*sigma)))
-    print(4e-9/g/30/resonator['C0'])
+    print(((2*a*rhos/(D*A*rho*(1 + 2*sigma/3)))/g)[0])
+
+    # print(30**2*resonator['C0']*chi/(D*A*(1 + 2*sigma)))
+    # print(4e-9/g/30/resonator['C0'])
     # print(np.array([csi*rhosi*1*9*7e-9*R,tau]).T)
     # print(np.array([1*tau/tau,tau*OMEGA,tau**2*omega0**2]).T)
     # print(OMEGA*tau)
