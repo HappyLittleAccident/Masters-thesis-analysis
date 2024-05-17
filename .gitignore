@@ -161,3 +161,7 @@ cython_debug/
 
 #folders
 /filip_calibration/Helmholtz_res_drive_dep/
+/filip_calibration/2023_4_Helmholtz_resonators_recal_2
+/filip_calibration/fsweeps_sorted_raw
+/processing_programs_plots/Helmholtz_res_drive_dep
+/processing_programs_plots/images
