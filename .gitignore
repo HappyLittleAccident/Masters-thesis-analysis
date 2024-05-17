@@ -166,3 +166,4 @@ cython_debug/
 /processing_programs_plots/Helmholtz_res_drive_dep
 /processing_programs_plots/images
 /simulations/simulations
+simulations/all_s.npy
