@@ -168,3 +168,4 @@ cython_debug/
 /simulations/simulations
 simulations/all_s.npy
 /processing_programs_plots/images
+/processing_programs_plots/switching_analysis_code/files_populations
