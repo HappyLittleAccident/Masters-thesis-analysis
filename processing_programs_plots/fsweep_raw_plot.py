@@ -14,7 +14,7 @@ from format_figure import polish,use_latex
 plt.close('all')
 folder = r'D:\OneDrive\OneDrive - Univerzita Karlova\DATA\2023-03-Helmholtz_turbulence\Helmholtz_res_drive_dep'
 
-temp = 'T1350'
+temp = 'T1850'
 resonators = ['500A','500B','500C','500D']
 
 cmap = plt.get_cmap('viridis')
@@ -31,9 +31,10 @@ for resonator in resonators:
     for file in filenames[:]:
         data = np.load(file,allow_pickle=True).item()
         f = data['freq (Hz)']
-        x = data['x (A)']
-        y = data['y (A)']
-        A = data['App (V)']
+        x = np.array(data['x (A)'])
+        y = np.array(data['y (A)'])
+        A = np.array(data['App (V)'])
+        print(A/np.max(np.abs(x+1j*y)),f[np.argmin(x)]-f[np.argmax(x)])
         axx.plot(f,x,'.',c = cmap(A/A_max))
         axy.plot(f,y,'.',c = cmap(A/A_max))
         axx.set_title(resonator)

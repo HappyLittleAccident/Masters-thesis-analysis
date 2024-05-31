@@ -187,8 +187,8 @@ for i,file in enumerate(files[0:1]):
         axT.plot(freqs/np.pi/2,np.abs(T_plot(freqs)*Fes),c=cmap(color_scale))
         figgraph.canvas.draw()
         # print('c4: ',c4)
-        while not plt.waitforbuttonpress():
-            pass
+        # while not plt.waitforbuttonpress():
+        #     pass
 
     print(letter + ': ',f0[0],'\ntheory: ',f0_theory[0], '\ntheory simple: ',f0_simple[0])
     

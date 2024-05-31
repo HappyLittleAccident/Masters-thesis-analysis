@@ -19,8 +19,8 @@ plt.close('all')
 
 temps = ['T1325', 'T1350', 'T1375', 'T1400', 'T1425', 'T1450', 'T1475',
          'T1500', 'T1550', 'T1650', 'T1700', 'T1750', 'T1850', 'T1950']
-resonators = ['500A', '500B', '500C']
-names = ['C', 'J', 'R']
+resonators = ['500A', '500B', '500C','500D']
+names = ['C', 'J', 'R','G']
 
 # use_latex()
 # plt.rcdefaults()
@@ -74,7 +74,7 @@ D = 500e-9
 A = np.pi*(2.5e-3)**2
 colors = ['r','b','tab:orange','k']
 
-for i,resonator in enumerate(resonators[0:1]):
+for i,resonator in enumerate(resonators[0:]):
     fig,ax = plt.subplots(1,1,sharex=False,dpi=150)
     fig_w, ax_w = plt.subplots()
     for j,temp in enumerate(temps):
@@ -88,8 +88,11 @@ for i,resonator in enumerate(resonators[0:1]):
             rf'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\Helmholtz_res_VLD\{temp}\{resonator}\*.npy'
             )
 
-        data = np.load(filenames[5],allow_pickle=True).item()
-        data_vld = np.load(filenames_vld[5],allow_pickle=True).item()
+        try:
+            data = np.load(filenames[2],allow_pickle=True).item()
+            data_vld = np.load(filenames_vld[2],allow_pickle=True).item()
+        except:
+            pass
         
         upP = data['upPressure (Pa/m)']/1.3
         downP = data['downPressure (Pa/m)']
@@ -99,12 +102,12 @@ for i,resonator in enumerate(resonators[0:1]):
         jump = data['jumpVelocity (m/s)']*100
         
         
-        upV = data_vld['upV (m/s)']*1.07
+        upV = data_vld['upV (m/s)']*1.5
         upL = data_vld['upL (m^-2)']
         T = data_vld['Temp (K)']
         width = data_vld['Width (Hz)']
         letter = resonator[-1]
-        print(T,width)
+
         
         resonator_pars = resonators_geometry[letter]
         k = resonator_pars['kp']
@@ -123,15 +126,20 @@ for i,resonator in enumerate(resonators[0:1]):
         kappa = he.quantized_circulation
         L = 0e9
         c4 = he.fourth_sound_velocity(T)
-        alpha = expand(T)
-
+        # alpha = expand(T)
         
         
 
         ax_w.plot(upP/rho/upV/2/np.pi)
-        # ax_w.axhline(width)
+        ax_w.axhline(width)
         
-        ax.plot(upV*100, 1e3*upV/(upP/rho/upV - 2*np.pi*width)/np.sqrt(2),c=cmap(scale))
+        friction_scale = 1e3*upV/np.sqrt(2)/(alpha*upL*kappa)
+        friction_scale_alternative = 1e3*upP/(np.sqrt(2)*rho*(2*np.pi*width+alpha*upL*kappa)*alpha*upL*kappa)
+        # ax.plot((upV*100)[np.logical_and(friction_scale<5,friction_scale>0)], friction_scale[np.logical_and(friction_scale<5,friction_scale>0)],c=cmap(scale))
+        ax.plot((upV*100)[np.logical_and(friction_scale<5,friction_scale>0)], friction_scale_alternative[np.logical_and(friction_scale<5,friction_scale>0)],c=cmap(scale))
+        
+        
+        # print(T, (upP/rho/upV/2/np.pi) - width)
         # ax.plot(upV*100,upL + indent,c=cmap(scale))
     ax.axhline(1,c='k',ls = '--',label='channel dimension') #1mm
     ax.set_xlabel('Superfluid velocity (cm/s)')

@@ -62,7 +62,7 @@ for letter in letters:
                 
                 p = np.full_like(r,P)
                 amps.append(amp)     
-    #%%            
+            
                 ps.append(p)
                 vs.append(r)
                 amp_last = amp
@@ -107,26 +107,53 @@ for a in ax[:,1]:
 
 # fig.tight_layout()    
 # axcbar.set_aspect(1)
-fig.supxlabel('Pressure gradient (Pa/mm)')
+fig.supxlabel('Pressure gradient (kPa/mm)')
 fig.supylabel('Superfluid velocity (cm/s)')
 # ax.set_xlabel('Pressure (Pa/mm)')
 # ax.set_ylabel('Velocity (cm/s)')
 # ax.set_title(f'Temperature {temp}')
 
-polish(fig, 1, name='images//switching', extension='.png', grid=False,width_to_height = 0.8,tight_layout=False)        
+polish(fig, 1, name='images//switching', extension='.png', grid=True,width_to_height = 0.8,tight_layout=False)        
 
 
 #%% plot single measurements
+plt.close('all')
 basefolder = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2'
 switching_sweeps_names = {'1.35':'T1350','1.45':'T1450','1.65':'T1650','1.85':'T1850'}
 temps = ['1.35','1.45','1.65','1.85']
 
-fig,ax= plt.subplots(2,3)
+plt.rcdefaults()
+indices = [45,95,100,200,220,300,200,250]
 
-        
+for i,temp in enumerate(temps):
+    folder = basefolder+f'\\Helmholtz_buffer_measurements\\{switching_sweeps_names[temp]}\\buffer\\resonator_500B\\*npy'
+    files = glob(folder)
+    A_last = 0
+    fig,ax= plt.subplots(1,2,sharey= True)
+    len_files = len(files)
+    print('len: ',len_files)
+    files.sort(key = lambda x: np.load(x,allow_pickle=True).item()['App_gen (V)'])
 
 
+    d = np.load(files[indices[2*i]],allow_pickle=True).item()
+    # print(d.keys())
+    t = d['time (s)']
+    vs = d['Velocity (m/s)']
+    P = d['Pressure (Pa/m)']
 
+    print('P1',P)
+    ax[0].plot(t,vs,'ko',ms=0.5)
+    
+    d = np.load(files[indices[2*i+1]],allow_pickle=True).item()
+    t = d['time (s)']
+    vs = d['Velocity (m/s)']    
+    P = d['Pressure (Pa/m)']
+
+    print('P2',P)
+    ax[1].plot(t,vs,'ko-',ms=0.5,lw=0.1)
+    fig.supxlabel('Time (s)')
+    fig.supylabel('Superfluid velocity')
+    fig.suptitle(f'Temperature = {temp}K')
 
 
 

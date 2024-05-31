@@ -167,11 +167,12 @@ plt.close('all')
 #%%
 fign,axn = plt.subplots(2,2)
 axn = axn.flatten()
-all_s_loaded = np.load('all_s.npy',allow_pickle=True)
-
+# all_s_loaded = np.load('all_s.npy',allow_pickle=True)
+all_s_loaded = np.load('simulations\\all_s_decay_only.npy',allow_pickle=True)
+times = range(all_s_loaded[0][0,0,:])
 for i,s in enumerate(all_s_loaded):
     axn[i].set_title(i)              
-    axn[i].plot(times,np.sum(np.abs(s),axis=(0,1)))
+    axn[i].loglog(times,np.sum(np.abs(s),axis=(0,1)))
 all_s_loaded = None
 #%%
 
@@ -264,7 +265,7 @@ class PauseAnimation:
         plt.waitforbuttonpress()
         self.animation = animation.FuncAnimation(
             fig, self.update, frames=N, interval=50, blit=True)
-        # self.animation.pause()
+        self.animation.pause()
         self.paused = False
         
         fig.canvas.mpl_connect('button_press_event', self.toggle_pause)

@@ -22,8 +22,8 @@ temps_strings = [name[-4:] for name in temperature_folders]
 resonators = ['500A', '500B', '500C']
 names = ['C', 'J', 'R']
 
-use_latex()
-# plt.rcdefaults()
+# use_latex()
+plt.rcdefaults()
 
 cmap = plt.get_cmap('winter')
 viridis = plt.get_cmap('viridis')
@@ -32,7 +32,10 @@ viridis = plt.get_cmap('viridis')
 
 for i,resonator in enumerate(resonators[0:]):
     fig_hist,ax_hist = plt.subplots(dpi=200)
+
+
     for j,temp in enumerate(temps_strings[:]):
+
         filenames = glob(folder + f'\\T{temp}\\{resonator}\\*.npy')
     
         scale = (float(temp[:])*1e-3 - 1.325)/(1.95 - 1.325)
@@ -48,10 +51,16 @@ for i,resonator in enumerate(resonators[0:]):
             jumpV = data['jumpV (m/s)']*100
             
             
-            upL = data['upL (m^-2)']     + indent
-            downL = data['downL (m^-2)'] + indent
-            jumpL = data['jumpL (m^-2)'] + indent
+            upL = data['upL (m^-2)']     
+            downL = data['downL (m^-2)'] 
+            jumpL = data['jumpL (m^-2)']
+            
+            
 
+
+
+            upL+=indent
+            downL+=indent
             
             if resonator == '500C':
                 upV/=11
@@ -66,7 +75,8 @@ for i,resonator in enumerate(resonators[0:]):
             ax_hist.plot(upV,upL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
             ax_hist.plot(downV,downL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
             # ax_hist.semilogy(upV,upL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
-            
+
+        
     if i==2:
         ax_hist.set_ylim(-0.1,1)
         ax_hist.set_xlabel('Normalised superfluid velocity (Arb.)')
@@ -75,10 +85,12 @@ for i,resonator in enumerate(resonators[0:]):
         ax_hist.set_xlabel('Superfluid velocity (cm/s)')
         ax_hist.set_ylabel('VLD ($m^{-2}$)')
         
+
+
     fig_hist.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
     vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax_hist, label='Temperature (K)')
     # fig_hist.tight_layout()
-    
+
 
     polish(fig_hist, 1, name=f'images//VLD{names[i]}', extension='.png', grid=True,width_to_height = 2.5,tight_layout=True)        
 

@@ -25,8 +25,8 @@ use_latex()
 cmap = plt.get_cmap('winter')
 viridis = plt.get_cmap('viridis')
 
-plt.ioff()
-# plt.ion()
+# plt.ioff()
+plt.ion()
 
 for i,resonator in enumerate(resonators[0:]):
     fig,ax = plt.subplots(3,1,sharex=False,dpi=250,gridspec_kw={'height_ratios': [1, 1,0.05]})
