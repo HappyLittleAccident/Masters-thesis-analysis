@@ -50,9 +50,9 @@
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:snap-to-guides="false"
-     inkscape:window-width="2400"
-     inkscape:window-height="1421"
-     inkscape:window-x="2391"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
      units="mm"
@@ -76,7 +76,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -8527,7 +8527,7 @@
              sodipodi:role="line"
              style="font-size:21.3333px">C<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2383">sh</tspan></tspan></text>
+   id="tspan2385">B</tspan></tspan></text>
         <text
            id="text1498-7-1-5-42"
            y="-263.14389"
