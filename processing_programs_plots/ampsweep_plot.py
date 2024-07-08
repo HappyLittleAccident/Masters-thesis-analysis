@@ -19,8 +19,8 @@ temps = ['T1325', 'T1350', 'T1375', 'T1400', 'T1425', 'T1450', 'T1475',
 resonators = ['500A', '500B', '500C']
 names = ['C', 'J', 'R']
 
-use_latex()
-# plt.rcdefaults()
+# use_latex()
+plt.rcdefaults()
 
 cmap = plt.get_cmap('winter')
 viridis = plt.get_cmap('viridis')
@@ -28,7 +28,7 @@ viridis = plt.get_cmap('viridis')
 # plt.ioff()
 plt.ion()
 
-for i,resonator in enumerate(resonators[0:]):
+for i,resonator in enumerate(resonators[0:3]):
     fig,ax = plt.subplots(3,1,sharex=False,dpi=250,gridspec_kw={'height_ratios': [1, 1,0.05]})
     for temp in temps[0::]:
         if (temp in ['T1325','T1650','T1850'] and i<2) or (i==2 and temp in ['T1325','T1550','T1700']):
@@ -172,6 +172,61 @@ for i,resonator in enumerate(resonators[0:]):
     
     fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
     vmin=1.325, vmax=1.95, clip=False), cmap=cmap),orientation='horizontal',location="bottom", ax=None,cax=ax[2], label='Temperature (K)')
+
+    for j,temp in enumerate(temps[0::]):
+        scale = (float(temp[1:])*1e-3 - 1.325)/(1.95 - 1.325)
+
+        filenames = glob(os.path.join(folder+'_old_calib',f'{temp}','ampsweeps_fast',f'resonator_{resonator}_updowndown','*.npy'))
+        # A_max = np.max([np.load(file_temp,allow_pickle=True).item()['App (V)'] for file_temp in filenames])
+        vs = []
+        ps = []    
+        for file in filenames[:]:
+            data = np.load(file,allow_pickle=True).item()
+            
+            indent= j*(700+ (i==1)*5000 + (i==2)*1500)
+            upP = data['upPressure (Pa/m)'] + indent
+            downP = data['downPressure (Pa/m)'] + indent
+            jumpP = data['jumpPressure (Pa/m)'] + indent
+            upV = data['upVelocity (m/s)']*100 
+            downV =  data['downVelocity (m/s)']*100
+            jumpV = data['jumpVelocity (m/s)']*100  
+            
+            
+            if resonator == '500C':
+                upP/=25000
+                downP/=25000
+                jumpP/=25000
+                upV/=11
+                downV/=11
+                jumpV/=11
+                if j>len(temps)-3:
+                    continue
+            
+            
+
+            vs.append(downV)
+            vs.append(jumpV)
+            # print(temp)
+
+            ps.append(downP)
+            ps.append(jumpP)
+            ax[1].plot(upP,upV,'.',markeredgewidth=0.0,ms=0.5,c=viridis(scale),alpha=0.2)
+            ax[1].plot(downP,downV,'.',markeredgewidth=0.0,ms=0.5,c=viridis(scale),alpha=0.2)
+            
+    if i==2:
+        ax[0].set_xlabel('Normalised pressure gradient (Arb.)')
+        ax[1].set_xlabel('Normalised pressure gradient (Arb.)')
+        ax[0].set_ylabel('Normalised superfluid velocity (Arb.)')
+        ax[1].set_ylabel('Normalised superfluid velocity (Arb.)')
+    else:
+        ax[0].set_xlabel('Pressure gradient (Pa/m)')
+        ax[1].set_xlabel('Pressure gradient (Pa/m)')
+        ax[0].set_ylabel('Superfluid velocity (cm/s)')
+        ax[1].set_ylabel('Superfluid velocity (cm/s)')
+
+
+
+
     # 
 
     # polish(fig, 1, name=f'images//ampsweeps{names[i]}', extension='.png', grid=True,width_to_height = 1.3)        
@@ -183,7 +238,7 @@ for i,resonator in enumerate(resonators[0:]):
     # ax=ax, label='Temperature (K)')
 
 
-    polish(fig, 1, name=f'images//ampsweeps{names[i]}', extension='.png', grid=True,width_to_height = 0.5,tight_layout = True)        
+    # polish(fig, 1, name=f'images//ampsweeps{names[i]}', extension='.png', grid=True,width_to_height = 0.5,tight_layout = True)        
 
 
 

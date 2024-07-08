@@ -57,7 +57,7 @@ epsilon = 8.854e-12
 
 
 plt.close('all')
-fig,ax=plt.subplots()
+fig,ax=plt.subplots(dpi=200)
 fig_c,ax_c = plt.subplots()
 resonators = ['A','B','C']
 geometry = ['C','J','R']
@@ -129,10 +129,12 @@ for j,resonator in enumerate(resonators[:]):
     
     kp=3*par_k[1]**2/par_k[0]/D**2
     print(f'{kp:.4e} filip: {3*resonators_geometry[resonator]["kp"]:.4e}')
-ax.plot([],[],'k--',label=r'fit to $I = C_0 + \sigma U_B^2$')
+    #%%
+ax.plot([],[],'k--',label=r'fit to $C_M = C_0 + \sigma U_B^2$')
 ax.legend()
 ax.set_xlabel(r'$U_B^2 \mathrm{(V^2)}$')
 ax.set_ylabel(r'$C_M$ (pF)')
-polish(fig, 1, name='images\\calibrate_kp', extension='.png', grid=True,width_to_height = 2.5,tight_layout=True)        
+#%%
+polish(fig, 1, name=r'D:\Github\Masters-thesis-analysis\processing_programs_plots\images\calibrate_kp', extension='.png', grid=True,width_to_height = 0.7,tight_layout=True)        
 
 

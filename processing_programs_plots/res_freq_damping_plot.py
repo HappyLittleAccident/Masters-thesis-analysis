@@ -44,7 +44,7 @@ expand = CubicSpline(T_spline,alpha_spline)
 resonators_geometry = {
     'A':{        
         'w':  1000e-6,
-        'l':  1.64*1050e-6,
+        'l':  1050e-6,
         'C0': 338.63213961685864e-12,
         'kp': 3*1.2400632746323976e7
         },
@@ -52,22 +52,22 @@ resonators_geometry = {
     
     'B':{        
         'w':  1000e-6,
-        'l':  1.55*750e-6,
+        'l':  750e-6,
         'C0': 335.6978986554392e-12,
-        'kp': 2*1.4546169638969617e7
+        'kp': 3*1.4546169638969617e7
         },
     
     'C':{        
         'w':  950e-6,
-        'l':  1.03*1000e-6,
+        'l':  1000e-6,
         'C0': 312.8732100355237e-12,
-        'kp': 2*1.1909096177342793e7
+        'kp': 3*1.1909096177342793e7
         },
     'D':{
         'w': 1000e-6, #orig= 500e-6
-        'l': 1.405*950e-6,
+        'l': 950e-6,
         'C0':466.4158697787019e-12,
-        'kp':2*1.6174502699593267e7
+        'kp':3*1.6174502699593267e7
         }}
 
 
@@ -97,11 +97,11 @@ def response(omega,omega0,tau,OMEGA):
 D = 500e-9
 A = np.pi*(2.5e-3)**2
 colors = ['r','b','tab:orange','k']
-for i,file in enumerate(files[:1]):
+for i,file in enumerate(files[:]):
     letter = file.split('\\')[-1].split('.')[0][-1]
 
     d = np.load(file,allow_pickle=True).item()
-    T = np.array(d['temperature (K)'])-0.0646
+    T = np.array(d['temperature (K)'])
 
     f0s = d['frequency (Hz)']
     f0 = [np.mean(x) for x in f0s]
@@ -116,7 +116,7 @@ for i,file in enumerate(files[:1]):
     
     resonator = resonators_geometry[letter]
     k = resonator['kp']
-    l = resonator['l']
+    l = resonator['l']*1.6
     a = D*resonator['w']
     
     rhos = he.superfluid_density(T)
@@ -126,7 +126,7 @@ for i,file in enumerate(files[:1]):
     c = he.heat_capacity(T)/0.0040026
     s = he.entropy(T)
     # R = 300e-4*T**(-3)/A #test
-    R = 89.1*T**(-3.6) #quartz
+
     # R = 2.05e3*T**(-1.91) #borosilicate
     
     B = he.mutual_friction_B(T)
@@ -136,6 +136,7 @@ for i,file in enumerate(files[:1]):
     alpha = expand(T)
     eta = he.viscosity(T)[0]
     
+    R = 81.1*T**(-3.6) #quartz
     tau = (R*c*D*A*rho)
     OMEGA = 2*s**2 * a * T0*R*rhos/l
     omega0 = np.sqrt(2*rhos*a*k/(l*rho**2)/(2*A**2 + k*D*A*chi))
@@ -184,22 +185,38 @@ for i,file in enumerate(files[:1]):
     theory_width = width(a,s,T0,rhos,R,l,B,kappa,rho,L)
     theory_width_full = width_full(omega0,tau,OMEGA,B,kappa,rho,rhos,L)
     def res_freq_fit(x,const1,const2):
-        x=np.copy(x-const2)
+        x=np.copy(x-0.015)
         rhos = he.superfluid_density(x)
         rho = he.density(x)
         chi = compres(x)
-        return np.sqrt(2*const1*rhos*a *k/((l*rho**2)*(2*A**2 + k*D*A*chi)))/2/np.pi 
+        T0 = x
+        c = he.heat_capacity(x)/0.0040026
+        s = he.entropy(x)
+        # R = 300e-4*T**(-3)/A #test
+        R = const2*89.1*x**(-3.6) #quartz
+        # R = 2.05e3*T**(-1.91) #borosilicate
+        l = resonator['l']*const1
+        
+        tau = (R*c*D*A*rho)
+        OMEGA = 2*s**2 * a * T0*R*rhos/l
+        omega0 = np.sqrt(2*rhos*a*k/(l*rho**2)/(2*A**2 + k*D*A*chi))
+        # return np.sqrt(2*rhos*a *k/((l*const1*rho**2)*(2*A**2 + k*D*A*chi)))/2/np.pi
+        return np.sqrt((
+                        omega0**2 *tau**2 + OMEGA*tau -1 +
+                        np.sqrt(4*omega0**2 * tau**2 + (1-omega0**2*tau**2-OMEGA*tau)**2)
+                        )/2
+                       )/tau/2/np.pi
     par0 = [1,1]
     par,sig = curve_fit(res_freq_fit,T,f0,p0=par0)
 
-    theory_f0_fit = res_freq_fit(T,*par)
+    theory_f0_fit = res_freq_fit(T-0.0,*par)
     axres.plot(T,f0,'o',c=colors[i],label='Measured')
     # axres.plot(T,theory_res_freq,'--',c=colors[i],label='Theoretical prediction corrected')
     # axres.plot(T,pure_theory,'-.',lw=0.5,c=colors[i],label='Theoretical prediction')
-    axres.plot(T,theory_f0_fit,'-.',lw=0.5,c='b',label='Fitted')
-    axres.plot(T,res_freq_fit(T,*par0),'-.',lw=0.5,c='k',label='Init')
+    axres.plot(T,theory_f0_fit,'-.',lw=0.5,c=colors[i],label='Fitted')
+    # axres.plot(T,res_freq_fit(T,*par0),'-.',lw=0.5,c='k',label='Init')
     
-    print('Fit pars alpha,beta:', *par)
+    print(f'Fit pars l coeff, R coeff: {par[0]} \t {par[1]*1e3:.1f} mK')
     
     axdamp.plot(T,w,'o',c=colors[i],label='Measured')
     axdamp.plot(T,theory_width,'--',c=colors[i],label='Theoretical prediction')

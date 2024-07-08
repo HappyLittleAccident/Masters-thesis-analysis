@@ -30,6 +30,12 @@ def compres (T):
 def res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,c,s):
     return np.sqrt(2*rhos*a/(l*rho**2) *k/(2*A**2 + k*D*A*chi))/2/np.pi 
                    
+def res_freq_full(omega0,tau,OMEGA):
+    return np.sqrt((
+                    omega0**2 *tau**2 + OMEGA*tau -1 +
+                    np.sqrt(4*omega0**2 * tau**2 + (1-omega0**2*tau**2-OMEGA*tau)**2)
+                    )/2
+                   )/tau/2/np.pi
 
 T_spline = [0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
 alpha_spline = np.array([4.5, 3.3, 0.8, -3.2, -9.5, -18.0, -26.8, -38.0, -52.2, -71.3, -97.6, -129.6])*1e-4
@@ -67,7 +73,7 @@ resonators_geometry = {
         'w':  950e-6,
         'l':  1.03*(1000e-6-cut),
         'C0': 312.8732100355237e-12,
-        'kp': 1.1909096177342793e7,
+        'kp': 3*1.1909096177342793e7,
         'D':  500e-9
         },
     'D':{
@@ -87,14 +93,14 @@ files = glob(os.path.join(folder,'*.npy'))
 
 
 figres,axres = plt.subplots(1,1,sharex=True)    
-figrest,((axvn,axx),(axT,axP)) = plt.subplots(2,2,sharex=True)
+# figrest,((axvn,axx),(axT,axP)) = plt.subplots(2,2,sharex=True)
 
 figdamp,axdamp = plt.subplots(1,1,sharex=True) 
-figgraph,axgraph = plt.subplots(2,1,sharex=True)
+# figgraph,axgraph = plt.subplots(2,1,sharex=True)
 cmap = plt.get_cmap('viridis')
 inferno = plt.get_cmap('Reds')
 
-fig_meas,ax_meas = plt.subplots()
+# fig_meas,ax_meas = plt.subplots()
 
 for i,file in enumerate(files[0:1]):
     f0_theory = []
@@ -117,6 +123,7 @@ for i,file in enumerate(files[0:1]):
 
     
     for T in temperatures:
+        T = T-0.015
         resonator = resonators_geometry[letter]
         C0 = resonator['C0']
         k = resonator['kp']
@@ -130,12 +137,14 @@ for i,file in enumerate(files[0:1]):
         T0 = T
         cp = he.heat_capacity(T)[0]/0.0040026
         s = he.entropy(T)[0]
-        R = 750*T**(-3.6) #60e-4*T**(-3) #
+        # R =  100*81.1*T**(-3.6) #60e-4*T**(-3) #
+        R =  65*(T/temperatures[-1])**(-3)
         B = he.mutual_friction_B(T)[0]
         kappa = he.quantized_circulation
         L = 0e9
         alpha = alpha_function(T).item()
         eta = he.viscosity(T)[0]
+        
         
         c1 = he.first_sound_velocity(T)[0]
         c2 = he.second_sound_velocity(T)[0]
@@ -151,9 +160,10 @@ for i,file in enumerate(files[0:1]):
                          rhos*dP/(rho*l) - rhos*s*dT/l - B*kappa*rhon*rhos*L*(vs-2*vn/3)/rho)
         eqnVn = sympy.Eq(I*omega*rhon*vn,
                          rhon*dP/(rho*l) + rhos*s*dT/l + B*kappa*rhon*rhos*L*(vs-2*vn/3)/rho - eta*8*vn/(D**2))
-
-        solution = sympy.solve([eqnF,eqnM,eqnS,eqnVs,eqnVn],x,dP,dT,vs,vn,dict = True)
         
+        print('solving')
+        solution = sympy.solve([eqnF,eqnM,eqnS,eqnVs,eqnVn],x,dP,dT,vs,vn,dict = True)
+        print('solved')
         
         f0_basic = res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s)
         freqs = 2*np.pi*np.linspace(f0_basic-400,f0_basic + 400,10000)
@@ -167,42 +177,47 @@ for i,file in enumerate(files[0:1]):
                                freqs[np.argmin(np.imag(vs_plot(freqs)))])/2/np.pi)
             
         f0_theory.append(freqs[np.argmax(vs_plot(freqs))]/2/np.pi)
-        f0_simple.append(res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s))
+        tau = (R*cp*D*A*rho)
+        OMEGA = 2*s**2 * a * T0*R*rhos/l
+        omega0 = np.sqrt(2*rhos*a*k/(l*rho**2)/(2*A**2 + k*D*A*chi))
+        f0_simple.append(res_freq_full(omega0, tau, OMEGA))
+        
+        # f0_simple.append(res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s))
         geom_factor_simple.append(f0_basic/np.sqrt(rhos/(chi*rho**2)))
         
         Fes = (C0*30*8e-3)/D
         
-        color_scale = (T-temperatures[0])/(temperatures[-1]-temperatures[0]) 
-        axgraph[0].clear()
-        axgraph[1].clear()
-        axgraph[0].plot(freqs/np.pi/2,np.real(vs_plot(freqs)*Fes),c=cmap(color_scale))
-        axgraph[1].plot(freqs/np.pi/2,np.imag(vs_plot(freqs)*Fes),c=cmap(color_scale))
-        axgraph[0].plot(freqs/np.pi/2,np.real(vs_plot(freqs)*Fes + vn_plot(freqs)*Fes*rhon/rhos),c=inferno(color_scale))
-        axgraph[1].plot(freqs/np.pi/2,np.imag(vs_plot(freqs)*Fes+ vn_plot(freqs)*Fes*rhon/rhos),c=inferno(color_scale))
+        # color_scale = (T-temperatures[0])/(temperatures[-1]-temperatures[0]) 
+        # axgraph[0].clear()
+        # axgraph[1].clear()
+        # axgraph[0].plot(freqs/np.pi/2,np.real(vs_plot(freqs)*Fes),c=cmap(color_scale))
+        # axgraph[1].plot(freqs/np.pi/2,np.imag(vs_plot(freqs)*Fes),c=cmap(color_scale))
+        # axgraph[0].plot(freqs/np.pi/2,np.real(vs_plot(freqs)*Fes + vn_plot(freqs)*Fes*rhon/rhos),c=inferno(color_scale))
+        # axgraph[1].plot(freqs/np.pi/2,np.imag(vs_plot(freqs)*Fes+ vn_plot(freqs)*Fes*rhon/rhos),c=inferno(color_scale))
         
-        axx.plot(freqs/np.pi/2,np.abs(x_plot(freqs)*Fes),c=cmap(color_scale))
-        axvn.plot(freqs/np.pi/2,np.abs(vn_plot(freqs)*Fes),c=cmap(color_scale))
-        axP.plot(freqs/np.pi/2,np.abs(P_plot(freqs)*Fes),c=cmap(color_scale))
-        axP.axhline(Fes*2*A/(2*A**2 + k*D*A*chi))
-        axT.plot(freqs/np.pi/2,np.abs(T_plot(freqs)*Fes),c=cmap(color_scale))
-        figgraph.canvas.draw()
+        # axx.plot(freqs/np.pi/2,np.abs(x_plot(freqs)*Fes),c=cmap(color_scale))
+        # axvn.plot(freqs/np.pi/2,np.abs(vn_plot(freqs)*Fes),c=cmap(color_scale))
+        # axP.plot(freqs/np.pi/2,np.abs(P_plot(freqs)*Fes),c=cmap(color_scale))
+        # axP.axhline(Fes*2*A/(2*A**2 + k*D*A*chi))
+        # axT.plot(freqs/np.pi/2,np.abs(T_plot(freqs)*Fes),c=cmap(color_scale))
+        # figgraph.canvas.draw()
         # print('c4: ',c4)
         # while not plt.waitforbuttonpress():
         #     pass
 
     print(letter + ': ',f0[0],'\ntheory: ',f0_theory[0], '\ntheory simple: ',f0_simple[0])
     
-
-    axx.set_title('x')
-    axvn.set_title('vn')
-    axT.set_title('dT')
-    axP.set_title('dP')
-    figrest.tight_layout()
-    # ax.plot(temperatures,f0_theory,'k--')
     
-    axres.plot(temperatures,f0,'o',c=colors[i],label='Measured '+letter)
-    axres.plot(temperatures,f0_theory,'--',c=colors[i],label='Theoretical prediction corrected')
-    axres.plot(temperatures,f0_simple,'-',c=colors[i],label='Theoretical prediction simple')
+    # axx.set_title('x')
+    # axvn.set_title('vn')
+    # axT.set_title('dT')
+    # axP.set_title('dP')
+    # figrest.tight_layout()
+    # # ax.plot(temperatures,f0_theory,'k--')
+    
+    axres.plot(np.array(temperatures),f0,'o',c=colors[i],label='Measured '+letter)
+    axres.plot(np.array(temperatures),f0_theory,'--',c=colors[i],label='Theoretical prediction corrected')
+    axres.plot(np.array(temperatures),f0_simple,'-',c=colors[i],label='Theoretical prediction simple')
    
     
     

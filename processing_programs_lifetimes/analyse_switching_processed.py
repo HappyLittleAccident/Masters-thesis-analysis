@@ -63,9 +63,9 @@ for letter in letters:
             folder = switching_sweeps_names[temp]
             folder_ampsweeps = switching_ampsweeps_names[temp]
             
-            basedir = r'..\2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep\{}\buffer'.format(folder)
+            basedir = r'2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep\{}\buffer'.format(folder)
             
-            ampsweeps_base = r'..\2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep\{}\ampsweeps_fast'.format(folder_ampsweeps)
+            ampsweeps_base = r'2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep\{}\ampsweeps_fast'.format(folder_ampsweeps)
             
             resdir = path.join(basedir,r'resonator_{}{}'.format(distance,letter))
             files = glob(path.join(resdir, r'*.npy'))

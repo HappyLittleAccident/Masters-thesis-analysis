@@ -15,6 +15,11 @@ import os
 plt.close('all')
 save = True
 
+"""
+middle mouse: select points for interpolation
+right mouse:  interpolate
+"""
+
 
 class get_drive():
     """
@@ -117,7 +122,7 @@ for letter in letters:
             distance = 500
                
             folder = switching_sweeps_names[temp]
-            basedir = fr'..\..\2023_4_Helmholtz_resonators_recal_2\Helmholtz_buffer_measurements\{folder}\buffer'
+            basedir = fr'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\Helmholtz_buffer_measurements\{folder}\buffer'
         
             resdir = path.join(basedir,r'resonator_{}{}'.format(distance,letter))
             files = glob(path.join(resdir, r'*.npy'))            

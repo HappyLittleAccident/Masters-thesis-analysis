@@ -22,7 +22,7 @@ temps = ['T1325', 'T1350', 'T1375', 'T1400', 'T1425', 'T1450', 'T1475',
 resonators = ['500A', '500B', '500C','500D']
 names = ['C', 'J', 'R','G']
 
-# use_latex()
+use_latex()
 # plt.rcdefaults()
 plt.ion()
 
@@ -54,28 +54,30 @@ resonators_geometry = {
         'w':  1000e-6,
         'l':  1.55*750e-6,
         'C0': 335.6978986554392e-12,
-        'kp': 2*1.4546169638969617e7
+        'kp': 3*1.4546169638969617e7
         },
     
     'C':{        
         'w':  950e-6,
         'l':  1.03*1000e-6,
         'C0': 312.8732100355237e-12,
-        'kp': 2*1.1909096177342793e7
+        'kp': 3*1.1909096177342793e7
         },
     'D':{
         'w': 1000e-6, #orig= 500e-6
         'l': 1.405*950e-6,
         'C0':466.4158697787019e-12,
-        'kp':2*1.6174502699593267e7
+        'kp':3*1.6174502699593267e7
         }}
 
 D = 500e-9
 A = np.pi*(2.5e-3)**2
 colors = ['r','b','tab:orange','k']
+plt.close('all')
+velocity_corrections= [1.7,1.3,7]
+fig,ax = plt.subplots(1,1,sharex=False,dpi=150)
+for i,resonator in enumerate(resonators[0:2]):
 
-for i,resonator in enumerate(resonators[0:]):
-    fig,ax = plt.subplots(1,1,sharex=False,dpi=150)
     fig_w, ax_w = plt.subplots()
     for j,temp in enumerate(temps):
         scale = (float(temp[1:])*1e-3 - 1.325)/(1.95 - 1.325)
@@ -89,12 +91,17 @@ for i,resonator in enumerate(resonators[0:]):
             )
 
         try:
-            data = np.load(filenames[2],allow_pickle=True).item()
-            data_vld = np.load(filenames_vld[2],allow_pickle=True).item()
+            data = np.load(filenames[10],allow_pickle=True).item()
+            data_vld = np.load(filenames_vld[10],allow_pickle=True).item()
         except:
             pass
+        if i == 2 and float(temp[1:]) >1800:
+            continue
         
-        upP = data['upPressure (Pa/m)']/1.3
+        vs_treshold = 0.15*(i==0) + 0.095*(i==1) + 0.02*(i==2)
+        friction_threshold = 20 #150 - 135*(i==1) - (i==2)*75
+        
+        upP = (data['upPressure (Pa/m)']/1.5)[data_vld['upV (m/s)']>vs_treshold]
         downP = data['downPressure (Pa/m)']
         jumpP = data['jumpPressure (Pa/m)']
         up = data['upVelocity (m/s)']*100
@@ -102,12 +109,13 @@ for i,resonator in enumerate(resonators[0:]):
         jump = data['jumpVelocity (m/s)']*100
         
         
-        upV = data_vld['upV (m/s)']*1.5
-        upL = data_vld['upL (m^-2)']
+        upV =(data_vld['upV (m/s)']*velocity_corrections[i])[data_vld['upV (m/s)']>vs_treshold]
+        upL = (data_vld['upL (m^-2)'])[data_vld['upV (m/s)']>vs_treshold]
         T = data_vld['Temp (K)']
         width = data_vld['Width (Hz)']
         letter = resonator[-1]
 
+        
         
         resonator_pars = resonators_geometry[letter]
         k = resonator_pars['kp']
@@ -136,17 +144,28 @@ for i,resonator in enumerate(resonators[0:]):
         friction_scale = 1e3*upV/np.sqrt(2)/(alpha*upL*kappa)
         friction_scale_alternative = 1e3*upP/(np.sqrt(2)*rho*(2*np.pi*width+alpha*upL*kappa)*alpha*upL*kappa)
         # ax.plot((upV*100)[np.logical_and(friction_scale<5,friction_scale>0)], friction_scale[np.logical_and(friction_scale<5,friction_scale>0)],c=cmap(scale))
-        ax.plot((upV*100)[np.logical_and(friction_scale<5,friction_scale>0)], friction_scale_alternative[np.logical_and(friction_scale<5,friction_scale>0)],c=cmap(scale))
+        ax.plot(
+            (upV*100)[np.logical_and(friction_scale<friction_threshold,friction_scale>0)],
+            friction_scale_alternative[np.logical_and(friction_scale<friction_threshold,friction_scale>0)]
+            ,c=cmap(scale),marker='.' if i==0 else '.',ls='',ms=3)
         
         
         # print(T, (upP/rho/upV/2/np.pi) - width)
         # ax.plot(upV*100,upL + indent,c=cmap(scale))
-    ax.axhline(1,c='k',ls = '--',label='channel dimension') #1mm
-    ax.set_xlabel('Superfluid velocity (cm/s)')
-    ax.set_ylabel(r'Friction scale $l_{\alpha}$ (mm)')
-    ax.legend()
-    fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
-    vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax, label='Temperature (K)')
-    
-    # ax.set_ylabel(r'VLD $(m^{-2})$')
+t = np.linspace(25.1,55,1000)
+ax.set_xlim(5,60)
+ax.plot(t,1/(t-25) +0.011*(t-55)**2 +1,ls=':',c='k')
+ax.annotate('Resonator J',xy=(0.02,0.25),xycoords='axes fraction')
+ax.annotate('Resonator C',xy=(0.7,0.5),xycoords='axes fraction')
+ax.axhline(1,c='k',ls = '--',label='channel dimension') #1mm
+ax.set_xlabel('Superfluid velocity (cm/s)')
+ax.set_ylabel(r'Friction scale $\mathcal{L}_{\mu}$ (mm)')
+ax.legend()
+fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
+vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax, label='Temperature (K)')
+# fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
+# vmin=1.325, vmax=1.95, clip=False), cmap=viridis), ax=ax, label='Temperature (K)',location='left')
 
+
+# ax.set_ylabel(r'VLD $(m^{-2})$')
+polish(fig, 1, name=f'images//friction{names[i]}', extension='.png', grid=True,width_to_height = 1.5,tight_layout=True)        

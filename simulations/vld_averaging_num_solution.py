@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp,quad,simpson
 from time import time
+from format_figure import use_latex,polish
 
 
 gamma0   = 2*np.pi*1e-3
@@ -106,11 +107,12 @@ np.save('parameters.npy',allow_pickle=True,arr=save_dict)
 
 #%%
 plt.close('all')
+use_latex()
 calculated_data = np.load('parameters_first_second.npy',allow_pickle=True).item()
 L1 = calculated_data['L0']
 L2 = calculated_data['L1']
 
-fig_gamma,ax_gamma = plt.subplots()
+fig_gamma,ax_gamma = plt.subplots(dpi = 250)
 ax_gamma.axhspan(gamma_l0*0.5,gamma_l0*1.5,color='silver',alpha = 0.5)
 
 ax_gamma.plot(L1[0,:],L1[1,:],'o',c='b',label="First harmonic")
@@ -120,12 +122,12 @@ ax_gamma.plot(L2[0,:],L2[1,:],'s',c='r',label='Second harmonic')
 ax_gamma.axhline(gamma_l0,c='k',label=r'Set damping $\alpha\gamma L_0$')
 ax_gamma.axhline(gamma_l0*1.5,c='k',ls='--')
 ax_gamma.axhline(gamma_l0*0.5,c='k',ls='--')
-ax_gamma.text(1,gamma0*0.52,r'50% error')
+ax_gamma.text(1,gamma0*0.52,r'$50\%$ error')
 ax_gamma.set_ylim(0,0.012)
 
 ax_gamma.legend(loc = 'upper right')
 ax_gamma.set_xlabel('Phase $\\varphi$ (rad)')
 ax_gamma.set_ylabel('Calculated damping $\\alpha\kappa L_0$ (arb.)')
 
-
+polish(fig_gamma,1, name=r'appendix', extension='.png',width_to_height=0.9 ,grid=True,tight_layout=True)
 
