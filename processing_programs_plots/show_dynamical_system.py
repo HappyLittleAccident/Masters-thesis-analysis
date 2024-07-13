@@ -20,7 +20,7 @@ Ls = np.linspace(0,4,1000)
 GS,LS = np.meshgrid(gs,Ls)
 
 def Ldot(L,d,g):
-    return -L -d*(L/(L**2 + 1)**2) + g
+    return -L -d*(L/(L**2 + 1))**2 + g
 
 colors = ['tab:blue','tab:orange']
 

@@ -96,20 +96,21 @@ fig_hist.supxlabel('Superfluid velocity (cm/s)')
 fig_hist.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
 vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax_hist, label='Temperature (K)',location = 'bottom')
     # fig_hist.tight_layout()
-    
+#%%
+
 ax_comp[1].axvline(31.8,c='k',lw=0.5)
 ax_comp[1].axvline(34.8,c='k',lw=0.5)
-gs = np.linspace(0,4,1000)
-Ls = np.linspace(0,4,1000)
+gs = np.linspace(0,6,1000)
+Ls = np.linspace(0,6,1000)
 
 GS,LS = np.meshgrid(gs,Ls)
 
 def Ldot(L,d,g):
-    return -L -d*(L/(L**2 + 1)**2) + g
+    return -L -d*(L/(L**2 + 1))**2 + g
 
 colors = ['tab:blue','tab:orange']
 
-ds = [2,6]
+ds = [6,15]
 for i,d in enumerate(ds):
     condition = np.logical_or(Ldot(LS-0.1,d,GS) < 0,Ldot(LS+0.1,d,GS) > 0)
     
@@ -120,8 +121,8 @@ for i,d in enumerate(ds):
     ax_comp[0].contour(GS,LS,result_inverse,levels=[0],colors=[colors[i]],linestyles=['--'],linewidths=[1])
     ax_comp[0].plot([],[],'-',c=colors[i],label=f'$d = {d}$')
 
-ax_comp[0].axvline(2.35,lw=0.5,c='k')
-ax_comp[0].axvline(2.6,lw=0.5,c='k')
+ax_comp[0].axvline(4.27,lw=0.5,c='k')
+ax_comp[0].axvline(4.85,lw=0.5,c='k')
 
 
 
@@ -129,7 +130,7 @@ ax_comp[0].set_xlabel('Vortex generation rate $g$')
 ax_comp[0].set_ylabel('Dimensionless vortex line density $L$')
 ax_comp[0].legend()
 
-ax_comp[0].annotate('bistable regime',[2.32,2.5],[0.1,3],xycoords='data',arrowprops=dict(arrowstyle="simple",color='k'))
+ax_comp[0].annotate('bistable regime',[4.32,4.5],[0.1,4.25],xycoords='data',arrowprops=dict(arrowstyle="simple",color='k'))
 
 ax_comp[1].set_xlabel('Superfluid velocity (cm/s)')
 ax_comp[1].set_ylabel('Vortex line density ($\mathrm{m^{-2}}$)')

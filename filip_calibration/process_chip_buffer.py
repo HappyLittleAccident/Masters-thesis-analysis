@@ -95,7 +95,7 @@ for temp in temps[:]:
     correct_drives = []
     correct_ys = []
     
-    fig,ax = plt.subplots(2,1)
+    fig,ax = plt.subplots(2,1,dpi=300)
     
     
     Ffiles = np.sort(Ffiles)
@@ -272,11 +272,11 @@ for temp in temps[:]:
         data_to_save = {'Pressure (Pa/m)': P*1e3,'Velocity (m/s)': V,'Temperature (K)': Temp,
                         'App_gen (V)':amplitude,'time (s)':t,'sample rate (Hz)':sample_rate}
         
-        if save:
-            path_save = fr'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep\{folder}\buffer\resonator_{height:}{letter:}'
-            os.makedirs(path_save,exist_ok=True)
-            path_save = os.path.join(path_save,file.split('\\')[-1])
-            np.save(path_save, data_to_save)
+        # if save:
+        #     path_save = fr'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep\{folder}\buffer\resonator_{height:}{letter:}'
+        #     os.makedirs(path_save,exist_ok=True)
+        #     path_save = os.path.join(path_save,file.split('\\')[-1])
+        #     np.save(path_save, data_to_save)
         
         
     # ax4.set_xlabel('pressure gradient (kPa/m)')

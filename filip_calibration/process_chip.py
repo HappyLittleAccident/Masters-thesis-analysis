@@ -14,7 +14,7 @@ import scipy as sc
 import sys 
 from scipy.optimize import curve_fit
 import helium_old as he
-
+from format_figure import use_latex,polish
 from fitting_class import MicrowavePeak
 
 def linfit(x,a,b):
@@ -32,12 +32,14 @@ def compres (T):
   
 
 plt.close('all')
+# plt.rcdefaults()
+use_latex()
 
-letter = 'D'
+letter = 'A'
 height = 500
-#Temp = 'T1325'
-Temp = 'T1950'
-T = 1.950
+Temp = 'T1550'
+# Temp = 'T1950'
+T = 1.325
 
 Nbot = None
 Ntop = 9
@@ -48,8 +50,8 @@ fity = True
 
 resonator = f'{height:}{letter:}'
 
-ampsweeps = rf'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023-03-Helmholtz_resonators\Helmholtz_res_drive_dep/{Temp:}/ampsweeps_fast/resonator_{resonator}_updowndown/*.npy'
-fsweeps = rf'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023-03-Helmholtz_resonators\Helmholtz_res_drive_dep/{Temp:}/fsweeps/resonator_{height:}{letter:}'+ '/' + '*.npy'
+ampsweeps = rf'D:\Github\Masters-thesis-analysis\filip_calibration\Helmholtz_res_drive_dep\{Temp:}\ampsweeps_fast\resonator_{resonator}_updowndown\*.npy'
+fsweeps = rf'D:\Github\Masters-thesis-analysis\filip_calibration\fsweeps_sorted_raw\{Temp:}\fsweeps\resonator_{height:}{letter:}'+ '\\' + '*.npy'
 
 Afiles = glob(ampsweeps)
 Ffiles = glob(fsweeps)
@@ -62,6 +64,8 @@ a2s = []
 b2s = []
 drs = []
 fig,ax = plt.subplots(2,1)
+
+
 
 Afiles = np.sort(Afiles)
 Ffiles = np.sort(Ffiles)
@@ -181,7 +185,15 @@ def Velocity (bias, I,T):
     
 fig3,ax3 = plt.subplots(1,1)
 fig4,ax4 = plt.subplots(1,1)
+
+plt.close('all')
+figa,axa = plt.subplots(2,2,dpi=300)
+gs = axa[0,0].get_gridspec()
+for a in axa[:,1]:
+    a.remove()
+axcorr = figa.add_subplot(gs[:,1])  
 for file in Afiles[Nbot:Ntop]: 
+
     d = np.load(file,allow_pickle=True).item()
     Amp_base = d['App_base (V)']
     Mod = np.array(d['App (V)'])
@@ -191,7 +203,12 @@ for file in Afiles[Nbot:Ntop]:
     f0 = d['freq (Hz)']
     bias = d['bias (V)']
     
+
+        
     Amp = 0.5*Amp_base*(1 + depth*Mod/500)
+
+
+    
     
     if fitx:
         bgx = background(f0, linfit(Amp, para[0], para[1]),linfit(Amp, parb[0], parb[1]))
@@ -207,6 +224,9 @@ for file in Afiles[Nbot:Ntop]:
     #bgx, bgy = (0,0)
     R = np.sqrt((x - bgx)**2 + (y - bgy)**2) 
     
+    
+
+
     N = len(Amp)
     Ndiv = int(N/3)
     upAmp = Amp[:Ndiv]
@@ -215,6 +235,36 @@ for file in Afiles[Nbot:Ntop]:
     upR = R[:Ndiv]
     downR = R[Ndiv:2*Ndiv]
     jumpR = R[2*Ndiv:]
+    
+    upx= x[:Ndiv]*1e9
+    upy= y[:Ndiv]*1e9
+    downx = x[Ndiv:2*Ndiv]*1e9
+    downy = y[Ndiv:2*Ndiv]*1e9
+    axa[0,0].plot(upAmp,upx,'o',c='tab:blue',ms=1,mew=0)
+    axa[0,0].plot(downAmp,downx,'o',c='tab:orange',ms=1,alpha=0.5,mew=0)
+    axa[1,0].plot(upAmp,upy,'o',c='tab:blue',ms=1,mew=0)
+    axa[1,0].plot(downAmp,downy,'o',c='tab:orange',ms=1,alpha=0.5,mew=0)
+    axcorr.plot(upAmp,np.sqrt(upx**2+upy**2),'ko',ms=1,mew=0,alpha=0.5,label='Up sweep uncorrected')
+    axcorr.plot(upAmp,upR*1e9,'o',c='tab:blue',ms=1,mew=0,label='Up sweep corrected')
+    axcorr.plot(downAmp,downR*1e9,'o',c='tab:orange',ms=1,alpha=0.5,mew=0,label='Down sweep corrected') 
+    # axcorr.legend()
+    # axa[0,0].set_xlabel('Frequency (Hz)')
+    axa[1,0].set_xlabel('Generator amplitude (V)')
+    axa[0,0].set_ylabel('In phase current (nA)')
+    axa[1,0].set_ylabel('Out of phase current (nA)')
+    axcorr.set_xlabel('Generator amplitude (V)')
+    axcorr.set_ylabel('Total current amplitude (nA)')
+    axcorr.annotate('Uncorrected',xy=(3,35.8),xytext=(2,30),arrowprops=dict(arrowstyle='->'))
+    axin = axcorr.inset_axes([1.5, 6, 2, 15],transform=axcorr.transData)
+    axin.plot(upAmp,upR*1e9,'o',c='tab:blue',ms=1,mew=0,label='Up sweep corrected')
+    axin.plot(downAmp,downR*1e9,'o',c='tab:orange',ms=1,mew=0,label='Down sweep corrected')
+    axin.set_xlim(0.17,0.6)
+    axin.set_ylim(5.2,17)
+    figa.tight_layout()
+    
+    polish(figa, 1, name='..//processing_programs_plots//images//raw_ampsweeps', extension='.png',width_to_height=1, grid=True,tight_layout=False)        
+
+    break
     
     uploss = bridgelosses(letter, f0, upAmp).get_loss()
     downloss = bridgelosses(letter, f0, downAmp).get_loss()
@@ -257,8 +307,7 @@ for file in Afiles[Nbot:Ntop]:
     #     folder = rf'D:\2023_4_Helmholtz_resonators_recal\Helmholtz_res_drive_dep/{Temp:}/ampsweeps_fast/resonator_{resonator}_updowndown'
     #     os.makedirs(folder,exist_ok=True)
     #     np.save(path_save, data_to_save)
-    
-    
+
 ax4.set_xlabel('pressure gradient (kPa/m)')
 ax4.set_ylabel('velocity (m/s)')
 ax4.set_title(f'T = {T:} K')

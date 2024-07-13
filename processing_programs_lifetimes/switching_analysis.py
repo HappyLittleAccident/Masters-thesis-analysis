@@ -33,7 +33,7 @@ folder_ampsweeps = switching_ampsweeps_names[temp]
 
 
 
-basedir = r'..\2023-03-Helmholtz_resonators\Helmholtz_res_drive_dep\{}\buffer'.format(folder)
+basedir = r'D:\Github\Masters-thesis-analysis\filip_calibration\Helmholtz_res_drive_dep\{}\buffer'.format(folder)
 
 ampsweeps_base = r'D:\OneDrive\OneDrive - Univerzita Karlova\DATA\2023-03-Helmholtz_resonators\Helmholtz_res_drive_dep\{}\ampsweeps_fast'.format(folder_ampsweeps)
 
@@ -182,7 +182,7 @@ for file in files: #and files[39:]:
         # ax[2].set_title('R component')
         # fig.tight_layout()
         
-ax_ampsweeps.plot(A,np.mean())
+# ax_ampsweeps.plot(A,np.mean())
     
 
 

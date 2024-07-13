@@ -14,6 +14,7 @@ import scipy as sc
 import sys 
 from scipy.optimize import curve_fit
 import helium_old as he
+from format_figure import use_latex,polish
 
 from fitting_class import MicrowavePeak
 from fitting_class import microwave_peak
@@ -24,7 +25,8 @@ from Circuit_losses_class import circuitlosses
 temps = ['T1325', 'T1350_4', 'T1375', 'T1400', 'T1425', 'T1450_2','T1475', 'T1500', 'T1550', 'T1650_2', 'T1700', 'T1750', 'T1850', 'T1950']
 
 
-plt.rcdefaults()
+# plt.rcdefaults()
+use_latex()
 resonators_geometry = {
     'A':{        
         'w':  1000e-6,
@@ -56,10 +58,10 @@ resonators_geometry = {
 
 plt.close('all')
 save = False
-
+viridis = plt.get_cmap('viridis')
 letters = ['A','B','C','D']
 fig2,ax2 = plt.subplots(2,2,sharex=True)
-fig,ax = plt.subplots(2,1,sharex=True)
+fig,ax = plt.subplots(2,1,sharex=True,dpi=300)
 for letter in letters[2:3]:
     print('letter: '+letter)
     for temp in temps[:]:
@@ -124,7 +126,7 @@ for letter in letters[2:3]:
             y = np.array(d['y (A)'])
             r = np.sqrt(x**2 + y**2)
             amp = d['App (V)']
-            
+            print(amp)
             
             
             if num == 0:
@@ -148,10 +150,10 @@ for letter in letters[2:3]:
             result = peak.fit(plot=True)
             par = result.best_values
             res_fit = result.best_fit
-            ax[0].plot(f, x, 'o',ms = 3)
-            ax[1].plot(f, y, 'o', ms = 3)
-            ax[0].plot(f, np.real(res_fit), 'k--')
-            ax[1].plot(f, np.imag(res_fit), 'k--')
+            ax[0].plot(f, x*1e9, 'o',ms = 3,c=viridis(amp/0.24736842105263157))
+            ax[1].plot(f, y*1e9, 'o', ms = 3,c=viridis(amp/0.24736842105263157))
+            ax[0].plot(f, np.real(res_fit)*1e9, 'k--')
+            ax[1].plot(f, np.imag(res_fit)*1e9, 'k--')
             """
             get linear background params
             a1 -> lin y
@@ -204,8 +206,8 @@ for letter in letters[2:3]:
         else:
             a1mean = np.mean(a1s[:3])
             b1mean = np.mean(b1s[:3])    
-            print(a1mean,b1mean)
-            ax[1].plot(f,background(f,a1mean,b1mean),'r--')    
+            # print(a1mean,b1mean)
+            ax[1].plot(f,background(f,a1mean,b1mean)*1e9,'r--')    
         
         
         '''background + losses subtraction + velocity and force calculation'''
@@ -287,18 +289,18 @@ for letter in letters[2:3]:
                 V[i] = v
                 # ax4.plot(t,V,'-o',ms = 0.2,lw = 0.2, color = 'tab:blue')
             amploss = bridgelosses(letter, f[np.argmax(V)], Amp).get_loss()
-            print(amploss)
+            # print(amploss)
             Amp = Amp*amploss*np.sqrt(2)
             P = Pgrad(bias, Amp,T)    
             # print(f'pressure={P:.2f}')
             data_to_save = {'Pressure (Pa/m)': P,'Velocity (m/s)': V,'Temperature (K)': Temp,'Freq (Hz)':f,
                             'App_gen (V)':amplitude}
             
-            if save:
-                path_save = fr'2023_4_Helmholtz_resonators_recal_2\Helmholtz_fsweeps\{folder.split("_")[0]}\{height:}{letter:}'
-                os.makedirs(path_save,exist_ok=True)
-                path_save = os.path.join(path_save,file.split('\\')[-1])
-                # np.save(path_save, data_to_save)
+            # if save:
+            #     path_save = fr'2023_4_Helmholtz_resonators_recal_2\Helmholtz_fsweeps\{folder.split("_")[0]}\{height:}{letter:}'
+            #     os.makedirs(path_save,exist_ok=True)
+            #     path_save = os.path.join(path_save,file.split('\\')[-1])
+            #     # np.save(path_save, data_to_save)
         
         
         ax2[0,0].set_title('lin y')
@@ -308,6 +310,15 @@ for letter in letters[2:3]:
         
         fig2.canvas.draw()
         fig.canvas.draw()
+        ax[1].set_xlabel('Frequency (Hz)')
+        ax[0].set_ylabel('In phase current (nA)')
+        ax[1].set_ylabel('Out of phase current (nA)')
+        fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
+        vmin=0.045, vmax=0.25, clip=False), cmap=viridis), ax=ax, label='Drive voltage (V)')
+        # fig.tight_layout()
+        polish(fig, 1, name='..//processing_programs_plots//images//raw_fsweeps', extension='.png',width_to_height=0.5, grid=True,tight_layout=False)        
+
+        
         
         if not save:
             while not plt.waitforbuttonpress():
