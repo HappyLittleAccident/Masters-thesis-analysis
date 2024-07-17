@@ -16,11 +16,11 @@ from scipy.optimize import curve_fit
 
 plt.close('all')
 
-figres,axres = plt.subplots(1,1,sharex=True)    
+# figres,axres = plt.subplots(1,1,sharex=True)    
 
-figdamp,axdamp = plt.subplots(1,1,sharex=True)    
+figdamp,(axres,axdamp) = plt.subplots(2,1,sharex=True)    
 
-figgraph,axgraph = plt.subplots(2,1,sharex=True)
+figgraph,axgraph = plt.subplots(1,2,sharex=True)
 
 # folder = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\Helmholtz_fsweeps_amplitudes_and_widths\widths'
 folder = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\resonance_freq'
@@ -74,8 +74,8 @@ resonators_geometry = {
 def res_freq(k,rhos,l,a,rho,A,D,chi,T0,c,s):
     return np.sqrt(2*rhos*a *k/((l*rho**2)*(2*A**2 + k*D*A*chi)) 
                    )/2/np.pi
-def width(a,s,T0,rhos,R,l,B,kappa,rho,L):
-    return (2*a*s**2 * T0 * rhos * R/l + B*kappa*(rho-rhos)*L/rho)/np.pi/2 
+def width(a,s,T0,rhos,R,l,B,kappa,rho,L,omega0,tau):
+    return (2*a*s**2 * T0 * rhos * R/(l+omega0**2 * tau**2) + B*kappa*(rho-rhos)*L/rho)/np.pi/2 
 
 def res_freq_full(omega0,tau,OMEGA):
     return np.sqrt((
@@ -97,7 +97,7 @@ def response(omega,omega0,tau,OMEGA):
 D = 500e-9
 A = np.pi*(2.5e-3)**2
 colors = ['r','b','tab:orange','k']
-for i,file in enumerate(files[:]):
+for i,file in enumerate(files[:1]):
     letter = file.split('\\')[-1].split('.')[0][-1]
 
     d = np.load(file,allow_pickle=True).item()
@@ -134,7 +134,7 @@ for i,file in enumerate(files[:]):
     L = 0
     c4 = he.fourth_sound_velocity(T)
     alpha = expand(T)
-    eta = he.viscosity(T)[0]
+    eta = he.viscosity(T)
     
     R = 81.1*T**(-3.6) #quartz
     tau = (R*c*D*A*rho)
@@ -149,7 +149,10 @@ for i,file in enumerate(files[:]):
     sigma = chi*D*k/(2*A)
     g = 2*a*rhos/(D*A*rho*(1 + 2*sigma))
     
-    
+    print('viscosity')
+
+    for x,y in zip(np.array(8*eta/(D**2)),np.array(2/3 * omega0 * (rho-rhos)/rhos)):
+        print(f'{x.T:.2e}\t{y:.2e}')
     
     # print(1/(12*rhos*eta/((rho-rhos)*D**2 * omega0**2))/2/np.pi)
     # print(((1+sigma/3)/(1+sigma)/1.66)[0])
@@ -248,7 +251,7 @@ for i,file in enumerate(files[:]):
     axdamp.set_ylabel('Linewidth (Hz)')
     axdamp.legend()
     
-    figres.canvas.draw()
+    figdamp.canvas.draw()
     figdamp.canvas.draw()
     # print(np.log(3e-9/1e-10)*kappa/2/np.pi/D)
  

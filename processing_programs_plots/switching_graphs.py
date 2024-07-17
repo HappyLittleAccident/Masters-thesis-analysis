@@ -110,7 +110,7 @@ for a in ax[:,1]:
 
 # fig.tight_layout()    
 # axcbar.set_aspect(1)
-fig.supxlabel('Pressure gradient (kPa/mm)')
+fig.supxlabel('Pressure gradient (Pa/mm)')
 fig.supylabel('Superfluid velocity (cm/s)')
 # ax.set_xlabel('Pressure (Pa/mm)')
 # ax.set_ylabel('Velocity (cm/s)')

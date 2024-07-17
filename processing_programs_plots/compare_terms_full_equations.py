@@ -43,12 +43,15 @@ alpha_spline = np.array([4.5, 3.3, 0.8, -3.2, -9.5, -18.0, -26.8, -38.0, -52.2, 
 alpha_function = CubicSpline(T_spline,alpha_spline)
 
 const_a = 1.6
-const_b = 1.192
+const_b = 1.12
+const_c = 1.49
 const_d = 1.79
 ka = 3
-kb = 2.66
-kd = 2.4
+kb = 3
+kd = 3
 const_k = 1
+cut = 0
+
 
 resonators_geometry = {
     'A':{        
@@ -62,7 +65,7 @@ resonators_geometry = {
     
     'B':{        
         'w':  500e-6,
-        'l':  const_b*(750e-6),
+        'l':  const_b*(750e-6-cut),
         'C0': 335.6978986554392e-12,
         'kp': kb*1.4546169638969617e7,
         'D':  500e-9
@@ -70,14 +73,14 @@ resonators_geometry = {
     
     'C':{        
         'w':  950e-6,
-        'l':  1.03*(1000e-6),
+        'l':  const_c*(1000e-6-cut),
         'C0': 312.8732100355237e-12,
-        'kp': 1.1909096177342793e7,
+        'kp': 3*1.1909096177342793e7,
         'D':  500e-9
         },
     'D':{
         'w': 1000e-6,#500e-6,
-        'l': const_d*(950e-6),
+        'l': const_d*(950e-6-cut),
         'C0':466.4158697787019e-12,
         'kp':kd*1.6174502699593267e7,
         'D':  500e-9
@@ -99,9 +102,9 @@ figgraph,axgraph = plt.subplots(2,1,sharex=True)
 cmap = plt.get_cmap('viridis')
 
 options = [1,1,1,1,1,1,1e-25,1,1,1,1,1,1,1,1]
-labels = ['all approx','vs + vn = vs','vn T grad zero','vn P grad zero','dot vn zero','entropy dP zero','mass dT zero','full']
+labels = ['no approx','alpha=0','vn T grad zero','vn P grad zero','dot vn zero','entropy dP zero','mass dT zero','full']
 
-for i in range(8):
+for i in range(2):
 
     f0_theory = []
     w_theory=[]
@@ -121,7 +124,7 @@ for i in range(8):
     # ax.plot(temperatures,f0,'o',c=colors[i],label='Measured')
     
 
-    
+    print(int(i==0))
     for T in temperatures:
         resonator = resonators_geometry[letter]
         C0 = resonator['C0']
@@ -136,7 +139,7 @@ for i in range(8):
         T0 = T
         cp = he.heat_capacity(T)[0]/0.0040026
         s = he.entropy(T)[0]
-        R = 640*T**(-3.8) #60e-4*T**(-3) #
+        R = 550*T**(-3.6) #60e-4*T**(-3) #
         B = he.mutual_friction_B(T)[0]
         kappa = he.quantized_circulation
         L = 0e9
@@ -149,17 +152,17 @@ for i in range(8):
     
         eqnF = sympy.Eq(x*k + dP*A,F)
         
-        eqnM = sympy.Eq(I*omega*rho*A*D*(chi*dP - options[i]*alpha*dT*options[i+6])-2*I*omega*x*A*rho,
-                        -2*a*(rhos*vs + options[i+5]*2*rhon*vn/3*options[i+6]))
-        eqnS = sympy.Eq(I*omega*(dT-options[i+1]*T0*alpha*dP/(cp*rho)*options[i+6]),
-                        (-dT +2*s*a*T0*R*rhos*(vs-options[i+5]*2*vn/3))/(R*rho*D*A*cp))
+        eqnM = sympy.Eq(I*omega*rho*A*D*(chi*dP - alpha*dT*int(i==0))-2*I*omega*x*A*rho,
+                        -2*a*(rhos*vs + 2*rhon*vn/3))
+        eqnS = sympy.Eq(I*omega*(dT-T0*alpha*dP/(cp*rho)*int(i==0)),
+                        (-dT +2*s*a*T0*R*rhos*(vs-2*vn/3*int(i==0)))/(R*rho*D*A*cp))
         eqnVs = sympy.Eq(I*omega*rhos*vs,
-                         rhos*dP/(rho*l) - rhos*s*dT/l - B*kappa*rhon*rhos*L*(vs-2*vn/3)/rho)
-        eqnVn = sympy.Eq(I*omega*rhon*vn*options[i+2]*options[i+6],
-                         rhon*dP/(rho*l)*options[i+3]*options[i+6] + options[i+4]*rhos*s*dT/l*options[i+6] + B*kappa*rhon*rhos*L*(vs-2*vn/3)/rho - eta*8*vn/(D**2))
+                         rhos*dP/(rho*l) - rhos*s*dT/l - B*kappa*rhon*rhos*L*(vs-2*vn/3*int(i==0))/rho)
+        eqnVn = sympy.Eq(I*omega*rhon*vn*int(i==0),
+                         rhon*dP/(rho*l) + rhos*s*dT/l*int(i==0) + B*kappa*rhon*rhos*L*(vs-2*vn/3*int(i==0))/rho - eta*8*vn/(D**2))
 
         solution = sympy.solve([eqnF,eqnM,eqnS,eqnVs,eqnVn],x,dP,dT,vs,vn,dict = True)
-        
+
         
         f0_basic = res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s)
         freqs = 2*np.pi*np.linspace(f0_basic-400,f0_basic + 400,10000)
@@ -202,12 +205,12 @@ for i in range(8):
     
     axdamp.plot(temperatures,w_theory,'--',c=colors[i],label='Theory ' + labels[i])
     
-axres.plot(temperatures,f0,'o',c='k',label='Measured '+letter)
+# axres.plot(temperatures,f0,'o',c='k',label='Measured '+letter)
 axres.set_xlabel('Temperature (K)')
 axres.set_ylabel('Resonance frequency (Hz)')
 axres.legend()  
     
-axdamp.plot(temperatures,w,'o',c='k',label='Measured '+letter)  
+# axdamp.plot(temperatures,w,'o',c='k',label='Measured '+letter)  
 axdamp.set_xlabel('Temperature (K)')
 axdamp.set_ylabel('Linewidth (Hz)')
 axdamp.legend()

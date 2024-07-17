@@ -26,7 +26,7 @@ use_latex()
 # plt.rcdefaults()
 plt.ion()
 
-cmap = plt.get_cmap('winter')
+cmap = plt.get_cmap('winter_r')
 viridis = plt.get_cmap('viridis')
 
 # plt.ioff()

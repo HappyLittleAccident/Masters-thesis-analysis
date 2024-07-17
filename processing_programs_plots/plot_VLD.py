@@ -25,27 +25,30 @@ names = ['C', 'J', 'R']
 use_latex()
 # plt.rcdefaults()
 
-cmap = plt.get_cmap('winter')
+cmap = plt.get_cmap('winter_r')
 viridis = plt.get_cmap('viridis')
 
 
-fig_hist,ax_hist = plt.subplots(1,3,dpi=200)
+fig_hist,ax_hist = plt.subplots(2,2,dpi=300,sharey=True,height_ratios = [1,0.05])
 fig_comp,ax_comp = plt.subplots(1,2,dpi=300)
-
-for i,resonator in enumerate(resonators[0:3]):
+gs = ax_hist[0,0].get_gridspec()
+for a in ax_hist[1,0:]:
+    a.remove()
+axcbar = fig_hist.add_subplot(gs[1, 0:])  
+for i,resonator in enumerate(resonators[0:2]):
     
     
     for j,temp in enumerate(temps_strings[:]):
 
         filenames = glob(folder + f'\\T{temp}\\{resonator}\\*.npy')
-    
+        print(temp)
         scale = (float(temp[:])*1e-3 - 1.325)/(1.95 - 1.325)
-        for filename in filenames[9:10]:
+        for k,filename in enumerate(filenames[:]):
             
             
             data = np.load(filename,allow_pickle= True).item()
             
-            indent= j*(10 - ((i==1)*0.06+0.32)*j + (i==1)*20 + (i==2)*1)*5e8
+            indent= j*(10-(0.06+0.32)*j +20)*5e8
             
             
             upV = data['upV (m/s)']*100 
@@ -59,9 +62,9 @@ for i,resonator in enumerate(resonators[0:3]):
             
             
             
-            if i<2 and temp == '1500':
+            if i<2 and temp == '1500' and k==9:
                 ax_comp[1].plot(upV+7*i,upL,label='Resonator ' + ('C' if i==0 else 'J'))
-
+                
 
             upL+=indent
             downL+=indent
@@ -76,26 +79,31 @@ for i,resonator in enumerate(resonators[0:3]):
                 if j>len(temps_strings)-4:
                     continue
                 
-            ax_hist[i].plot(upV,upL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
-            ax_hist[i].plot(downV,downL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
+            ax_hist[0,i].plot(upV,upL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
+            ax_hist[0,i].plot(downV,downL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
+            ax_hist[0,i].plot([0,5],[indent,indent],'--',c=cmap(scale),lw=0.5)
+           
             # ax_hist.semilogy(upV,upL,'.',markeredgewidth=0.0,ms=0.5,c=cmap(scale),alpha=0.2)
 
         
     if i==2:
         ax_hist[i].set_ylim(-0.1,1)
+        
         # ax_hist[i].set_xlabel('Normalised superfluid velocity (Arb.)')
         # ax_hist[i].set_ylabel('Normalised VLD (Arb.)')
     else:
 
-        
-        # ax_hist[i].set_xlabel('Superfluid velocity (cm/s)')
-        ax_hist[0].set_ylabel('VLD ($\mathrm{m^{-2}}$)')
+        ax_hist[0,i].set_xlim(0,None)
+        ax_hist[0,i].set_xlabel('Superfluid velocity (cm/s)')
+        ax_hist[0,0].set_ylabel('VLD ($\mathrm{m^{-2}}$)')
         
 
-fig_hist.supxlabel('Superfluid velocity (cm/s)')
+# fig_hist.supxlabel('Superfluid velocity (cm/s)')
 fig_hist.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
-vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=ax_hist, label='Temperature (K)',location = 'bottom')
-    # fig_hist.tight_layout()
+vmin=1.325, vmax=1.95, clip=False), cmap=cmap), ax=None,cax=axcbar, label='Temperature (K)',location = 'bottom')
+
+polish(fig_hist, 1, name='images//VLD', extension='.png', grid=True,width_to_height = 1,tight_layout=True)        
+
 #%%
 
 ax_comp[1].axvline(31.8,c='k',lw=0.5)
@@ -136,8 +144,6 @@ ax_comp[1].set_xlabel('Superfluid velocity (cm/s)')
 ax_comp[1].set_ylabel('Vortex line density ($\mathrm{m^{-2}}$)')
 ax_comp[1].legend()
 
-
-polish(fig_hist, 1, name=f'images//VLD{names[i]}', extension='.png', grid=True,width_to_height = 6,tight_layout=False)        
 polish(fig_comp, 1, name='images//compare_VLD', extension='.png', grid=False,width_to_height = 1.4,tight_layout=True)
 
     
