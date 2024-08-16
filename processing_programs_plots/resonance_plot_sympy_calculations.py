@@ -15,6 +15,7 @@ import sympy
 from sympy import I, init_printing
 from format_figure import use_latex,polish
 import matplotlib as mpl
+from scipy import constants
 
 plt.close('all')
 # plt.rcdefaults()
@@ -134,7 +135,7 @@ inferno = plt.get_cmap('Reds')
 # fig_meas,ax_meas = plt.subplots()
 plot_freqs = []
 plot_widths = []
-for i,file in enumerate(files[:1]):
+for i,file in enumerate(files[2:3]):
 
     # fig, ax = plt.subplots()
     letter = file.split('\\')[-1].split('.')[0][-1]
@@ -163,7 +164,7 @@ for i,file in enumerate(files[:1]):
             C0 = resonator['C0']
             k = resonator['kp']
             l = resonator['l']
-            D = resonator['D']
+            D = resonator['D']*2
             a = D*resonator['w']
             rhos = he.superfluid_density(T)[0]
             rho = he.density(T)[0]
@@ -200,6 +201,8 @@ for i,file in enumerate(files[:1]):
             solution = sympy.solve([eqnF,eqnM,eqnS,eqnVs,eqnVn],x,dP,dT,vs,vn,ell,dict = True)
             print('solved')
             
+
+            
             f0_basic = res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s)
 
             freqs = 2*np.pi*np.linspace(f0_basic-400,f0_basic + 400,10000)
@@ -218,7 +221,12 @@ for i,file in enumerate(files[:1]):
             f0_simple.append(res_freq_approximate(k,rhos,l,a,rho,A,D,chi,T0,cp,s,R))
             w_simple.append(width(a,s,T0,rhos,R,l,B,kappa,rho,L,omega0,tau,eta))
 
-
+            meff=2*rhos*l*a
+            y_zpf = np.sqrt(constants.hbar/2/omega0/meff)
+            # print(y_zpf)
+            omega_LC = 223872.9
+            # omega_LC = 1/np.sqrt(3.5e-2 * 5.63e-10)
+            print(2*a*rhos/(D*chi*k +  2*A)/D/rho*omega_LC*y_zpf)
             # f0_simple.append(res_freq_simple(k,rhos,l,a,rho,A,D,chi,T0,cp,s))
             # geom_factor_simple.append(f0_basic/np.sqrt(rhos/(chi*rho**2)))
             
@@ -322,7 +330,7 @@ axx.set_ylabel('$x$ (nm)')
 axP.set_ylabel('$\\Delta P$ (Pa)')
 axT.set_ylabel('$\\Delta T$ ($\\mathrm{\\mu K}$)')
 polish(figrest, 1, name='images//other_variables', extension='.png', grid=True,width_to_height = 0.5,tight_layout=True)        
-polish(figgraph, 0.9, name='images//vs_simulation', extension='.png', grid=True,width_to_height = 1,tight_layout=True)        
+polish(figgraph, 0.85, name='images//vs_simulation', extension='.png', grid=True,width_to_height = 1,tight_layout=True)        
 
 
 

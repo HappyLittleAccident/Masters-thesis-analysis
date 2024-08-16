@@ -13,6 +13,7 @@ import os
 from scipy.interpolate import CubicSpline
 import sympy as sp
 from scipy.optimize import curve_fit
+from scipy import constants
 
 plt.close('all')
 
@@ -94,7 +95,7 @@ def width_full(omega0,tau,OMEGA,B,kappa,rho,rhos,L):
 def response(omega,omega0,tau,OMEGA):
     return 1j*omega/(-omega**2+omega0**2 + 1j*omega*OMEGA/(1j*tau * omega +1))
 
-D = 500e-9
+D = 2*500e-9
 A = np.pi*(2.5e-3)**2
 colors = ['r','b','tab:orange','k']
 for i,file in enumerate(files[:1]):
@@ -102,7 +103,8 @@ for i,file in enumerate(files[:1]):
 
     d = np.load(file,allow_pickle=True).item()
     T = np.array(d['temperature (K)'])
-
+    T[0] = 1.250
+    
     f0s = d['frequency (Hz)']
     f0 = [np.mean(x) for x in f0s]
     
@@ -148,11 +150,17 @@ for i,file in enumerate(files[:1]):
     er = 1.0565
     sigma = chi*D*k/(2*A)
     g = 2*a*rhos/(D*A*rho*(1 + 2*sigma))
-    
-    print('viscosity')
 
-    for x,y in zip(np.array(8*eta/(D**2)),np.array(2/3 * omega0 * (rho-rhos)/rhos)):
-        print(f'{x.T:.2e}\t{y:.2e}')
+    meff=2*rhos*l*a
+    y_zpf = np.sqrt(constants.hbar/2/omega0/meff)
+    # print(y_zpf)
+    omega_LC = 223872.9
+    # omega_LC = 1/np.sqrt(3.5e-2 * 5.63e-10)
+    print(2*a*rhos/(D*chi*k +  2*A)/D/rho*omega_LC*y_zpf)
+    # print('viscosity')
+
+    # for x,y in zip(np.array(8*eta/(D**2)),np.array(2/3 * omega0 * (rho-rhos)/rhos)):
+    #     print(f'{x.T:.2e}\t{y:.2e}')
     
     # print(1/(12*rhos*eta/((rho-rhos)*D**2 * omega0**2))/2/np.pi)
     # print(((1+sigma/3)/(1+sigma)/1.66)[0])
@@ -185,7 +193,7 @@ for i,file in enumerate(files[:1]):
 
     # print(theory_res_freq-omega0/2/np.pi)
     
-    theory_width = width(a,s,T0,rhos,R,l,B,kappa,rho,L)
+    theory_width = width(a,s,T0,rhos,R,l,B,kappa,rho,L,omega0,tau)
     theory_width_full = width_full(omega0,tau,OMEGA,B,kappa,rho,rhos,L)
     def res_freq_fit(x,const1,const2):
         x=np.copy(x-0.015)
@@ -219,7 +227,7 @@ for i,file in enumerate(files[:1]):
     axres.plot(T,theory_f0_fit,'-.',lw=0.5,c=colors[i],label='Fitted')
     # axres.plot(T,res_freq_fit(T,*par0),'-.',lw=0.5,c='k',label='Init')
     
-    print(f'Fit pars l coeff, R coeff: {par[0]} \t {par[1]*1e3:.1f} mK')
+    # print(f'Fit pars l coeff, R coeff: {par[0]} \t {par[1]*1e3:.1f} mK')
     
     axdamp.plot(T,w,'o',c=colors[i],label='Measured')
     axdamp.plot(T,theory_width,'--',c=colors[i],label='Theoretical prediction')
@@ -253,6 +261,8 @@ for i,file in enumerate(files[:1]):
     
     figdamp.canvas.draw()
     figdamp.canvas.draw()
+    
+
     # print(np.log(3e-9/1e-10)*kappa/2/np.pi/D)
  
     # break
@@ -262,10 +272,11 @@ for i,file in enumerate(files[:1]):
     # axgraph[1].clear()
     # axdamp.clear()
     # axres.clear()
+    
 
 
-for temp in zip(T,c4,rhos,rho,f0,R):
-    print(f'T= {temp[0]:.3f} \t c4= {temp[1]:.1f} \t rhos= {temp[2]:.1f} \t rhon/rhos= {temp[3]/temp[2]-1:.1f} \t freq= {temp[4]:.1f}')
+# for temp in zip(T,c4,rhos,rho,f0,R):
+#     print(f'T= {temp[0]:.3f} \t c4= {temp[1]:.1f} \t rhos= {temp[2]:.1f} \t rhon/rhos= {temp[3]/temp[2]-1:.1f} \t freq= {temp[4]:.1f}')
 
 folder_vld = r'D:\OneDrive_copy\OneDrive - Univerzita Karlova\DATA\2023_4_Helmholtz_resonators_recal_2\Helmholtz_res_VLD'
 temperature_folders = glob(folder_vld+'\\*')
@@ -275,4 +286,4 @@ for j,temp in enumerate(temps_strings[:]):
     filenames = glob(folder_vld + f'\\T{temp}\\{resonator}\\*.npy')  
     d = np.load(filenames[0],allow_pickle=True).item()
     w = d['Width (Hz)']
-    print(f'T= {float(temp[:])*1e-3:.3f} \t w= {w:.1f} \t ')
+    # print(f'T= {float(temp[:])*1e-3:.3f} \t w= {w:.1f} \t ')

@@ -142,11 +142,11 @@ for i,resonator in enumerate(resonators[0:2]):
         ax_w.axhline(width)
         
         friction_scale = 1e3*upV/np.sqrt(2)/(alpha*upL*kappa)
-        friction_scale_alternative = 1e3*upP/(np.sqrt(2)*rho*(2*np.pi*width+alpha*upL*kappa)*alpha*upL*kappa)
+        # friction_scale_alternative = 1e3*upP/(np.sqrt(2)*rho*(2*np.pi*width+alpha*upL*kappa)*alpha*upL*kappa)
         # ax.plot((upV*100)[np.logical_and(friction_scale<5,friction_scale>0)], friction_scale[np.logical_and(friction_scale<5,friction_scale>0)],c=cmap(scale))
         ax.plot(
             (upV*100)[np.logical_and(friction_scale<friction_threshold,friction_scale>0)],
-            friction_scale_alternative[np.logical_and(friction_scale<friction_threshold,friction_scale>0)]
+            friction_scale[np.logical_and(friction_scale<friction_threshold,friction_scale>0)]
             ,c=cmap(scale),marker='.' if i==0 else '.',ls='',ms=3)
         
         
