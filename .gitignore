@@ -170,3 +170,6 @@ simulations/all_s.npy
 /processing_programs_plots/images
 /processing_programs_plots/switching_analysis_code/files_populations
 /simulations/anims
+*.png
+*.mph
+*.xcf
