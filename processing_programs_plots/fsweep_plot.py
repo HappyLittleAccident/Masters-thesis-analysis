@@ -25,13 +25,13 @@ names = ['C', 'J', 'R']
 cmap = plt.get_cmap('viridis')
 
 
-use_latex()
-# plt.rcdefaults()
+# use_latex()
+plt.rcdefaults()
 def lin(x,a,b):
     return a*x + b
 
 colors = ['tab:blue', 'k', 'tab:orange']
-for i, resonator in enumerate(resonators[0:3]):
+for i, resonator in enumerate(resonators[0:1]):
     figamp, axamp = plt.subplots()
     figwidth, axwidth = plt.subplots(2,1,dpi=250)
     cmaps = ['winter_r']*3
@@ -163,7 +163,7 @@ for i, resonator in enumerate(resonators[0:3]):
             r = data['Velocity (m/s)']*100
             P = data['Pressure (Pa/m)']*mult
             
-            ax.plot(f,r,'.',c=cmap(P/P_max))
+            ax.plot(f,r,'.',ms=2,c=cmap(P/P_max))
     
     ax.set_xlabel('Driving frequency (Hz)')
     ax.set_ylabel('Superfluid velocity (cm/s)')
@@ -172,4 +172,4 @@ for i, resonator in enumerate(resonators[0:3]):
     fig.colorbar(plt.cm.ScalarMappable(norm=mpl.colors.Normalize(
         vmin=0, vmax=P_max*1e-3, clip=False), cmap=cmap), ax=ax, label='Pressure gradient (Pa/mm)')
     
-    polish(fig, 1, name=f'images//fsweeps{names[i]}', extension='.png', grid=True,width_to_height = 1.5)
+    polish(fig, 0.6, name=f'images//fsweeps{names[i]}', extension='.png', grid=True,width_to_height = 1.5,tight_layout=True)

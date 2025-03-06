@@ -13,7 +13,8 @@ from format_figure import use_latex,polish
 
 
 plt.close('all')
-use_latex()
+# use_latex()
+plt.rcdefaults()
 T = np.linspace(0.001,he.T_lambda-0.0001,500)
 
 
@@ -29,8 +30,8 @@ ax.hlines(1,he.T_lambda-0.0001,he.T_lambda+0.5,color='r')
 ax.hlines(0,he.T_lambda-0.0001,he.T_lambda+0.5,color='b')
 ax.axvline(he.T_lambda,ls='--',c='k')
 ax.annotate(r'$\mathrm{\lambda}$-transition',xy=(he.T_lambda+0.05,0.4),rotation=90)
-ax.annotate(r'$\rho_s / \rho$',xy=(1,0.9),c='b')
+ax.annotate(r'$\rho_s / \rho$',xy=(1,0.85),c='b')
 ax.annotate(r'$\rho_n / \rho$',xy=(1,0.08),c='r')
 ax.set_xlabel('Temperature (K)')
 ax.set_ylabel('Fraction')
-polish(fig, 1, name='images//rhos_rho', extension='.png', grid=True,tight_layout=True)        
+polish(fig, 0.6, name='images//rhos_rho', extension='.png', grid=False,tight_layout=True)        

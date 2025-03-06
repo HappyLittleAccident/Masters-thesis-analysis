@@ -12,7 +12,7 @@ from scipy.interpolate import CubicSpline
 from format_figure import use_latex,polish
 
 plt.rcdefaults()
-use_latex()
+# use_latex()
 T_lambda = 2.1720
 def lambda_line(T):
     x = (T-T_lambda)
@@ -53,15 +53,15 @@ ax.plot(T_lambda_span,lambda_line(T_lambda_span),'k-')
 ax.plot(T,melting_curve(T),'k-')
 ax.set_xlim(0,5.5)
 ax.set_ylim(0,40)
-ax.annotate('Liquid He II',xy=(1,10))
+ax.annotate('Liquid He II',xy=(0.3,10))
 ax.annotate('Liquid He I', xy=(3.5,20))
-ax.annotate('Solid He',xy=(0.7,33))
-ax.annotate('He gas',xy=(4.95,0.51))
-ax.annotate('Critical point',xy=(T_crit-0.01,2.2),xytext=(4,5),arrowprops=dict(arrowstyle='->'))
+ax.annotate('Solid He',xy=(0.5,33))
+# ax.annotate('He gas',xy=(4.95,0.51))
+ax.annotate('Critical point',xy=(T_crit-0.01,2.2),xytext=(3,5),arrowprops=dict(arrowstyle='->'))
 ax.annotate(r'$\mathrm{\lambda}$-line',xy=(1.9,20),rotation=100+180)
 ax.set_xlabel('Temperature (K)')
 ax.set_ylabel('Pressure (atm.)')
 
 
-polish(fig, 1, name='images//phase_diagram', extension='.png',width_to_height=0.85, grid=False,tight_layout=True)        
+polish(fig, 0.6, name='images//phase_diagram', extension='.svg',width_to_height=0.85, grid=False,tight_layout=True)        
 
