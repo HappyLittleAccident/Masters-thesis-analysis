@@ -173,3 +173,6 @@ simulations/all_s.npy
 *.png
 *.mph
 *.xcf
+*.png
+*.mph
+*.lock
