@@ -176,3 +176,6 @@ simulations/all_s.npy
 *.png
 *.mph
 *.lock
+*.png
+*.png
+processing_programs_plots/images/fsweepsJ.png

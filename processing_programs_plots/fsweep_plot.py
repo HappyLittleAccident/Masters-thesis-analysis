@@ -31,7 +31,7 @@ def lin(x,a,b):
     return a*x + b
 
 colors = ['tab:blue', 'k', 'tab:orange']
-for i, resonator in enumerate(resonators[0:1]):
+for i, resonator in enumerate(resonators[0:]):
     figamp, axamp = plt.subplots()
     figwidth, axwidth = plt.subplots(2,1,dpi=250)
     cmaps = ['winter_r']*3
@@ -101,7 +101,7 @@ for i, resonator in enumerate(resonators[0:1]):
             scale = (float(temp[1:])*1e-3 - 1.325)/(1.95 - 1.325)
     
             if log:
-                axwidth[1].plot(amps,
+                axwidth[1].plot(drives,
                     widths-(
                         np.mean(widths[:index]) if resonator != '500C' else np.mean(widths[amps<0.4])#lin(amps,*par)
                             )+1, '.', lw=0.5, c=inferno(scale))
@@ -109,7 +109,7 @@ for i, resonator in enumerate(resonators[0:1]):
                 # axwidth.plot(amps,np.log(widths_hat-np.mean(widths[:index])),c=inferno(scale))
     
             else:
-                axwidth[0].plot(amps, widths, '.', c=inferno(scale))
+                axwidth[0].plot(drives, widths, '.', c=inferno(scale))
                 # axwidth.plot(amps,lin(amps,*par),'r-')
                 # axwidth.plot(amps,widths_hat,c=inferno(scale))
             # axwidth.plot(amps[index],widths[index],'ko')
